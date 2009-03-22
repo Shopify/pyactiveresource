@@ -234,7 +234,10 @@ def to_xml(obj, root='object', pretty=False, header=True):
                 element = ET.SubElement(root_element, key)
                 if value is not None:
                     element.text = str(value)
-                    if isinstance(value, int):
+                    if isinstance(value, bool):
+                        element.text = element.text.lower()
+                        element.set('type', 'boolean')
+                    elif isinstance(value, int):
                         element.set('type', 'integer')
                 else:
                     element.set('nil', 'true')
