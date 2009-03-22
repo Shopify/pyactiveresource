@@ -1,6 +1,6 @@
 from distutils.core import setup
 
-version = '1.0'
+version = '1.0.1'
 
 setup(name='pyactiveresource',
       version=version,
@@ -12,7 +12,7 @@ setup(name='pyactiveresource',
       package_dir={'pyactiveresource':'src'},
       license='MIT License',
       platforms=['any'],
-      classifiers=['Development Status :: 4 - Beta',
+      classifiers=['Development Status :: 5 - Production/Stable',
                    'Intended Audience :: Developers', 
                    'License :: OSI Approved :: MIT License', 
                    'Operating System :: OS Independent', 
