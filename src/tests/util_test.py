@@ -209,5 +209,14 @@ class UtilTest(unittest.TestCase):
     def test_xml_to_dict_errors_on_empty_string(self):
         self.assertRaises(Exception, util.xml_to_dict, '')
 
+    def test_xml_to_dict_parses_children_which_are_not_of_parent_type(self):
+        product_xml = '''
+          <products type="array">
+            <shamwow><made-in>Germany</made-in></shamwow>
+          </products>'''
+        self.assertEqual({'products': [{'made_in': 'Germany'}]},
+                         util.xml_to_dict(product_xml, saveroot=True))
+
+
 if __name__ == '__main__':
     unittest.main()

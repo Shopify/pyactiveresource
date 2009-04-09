@@ -279,7 +279,7 @@ def xml_to_dict(xmlobj, saveroot=False):
             for child in element.getchildren():
                 attribute = xml_to_dict(child, saveroot)
                 if isinstance(attribute, dict):
-                    attribute = attribute[child_tag]
+                    attribute = attribute.values()[0]
                 attributes.append(attribute)
             return {element.tag.replace('-', '_'): attributes}
         else:
