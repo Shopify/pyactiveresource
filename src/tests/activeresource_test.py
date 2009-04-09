@@ -287,7 +287,7 @@ class ActiveResourceTest(unittest.TestCase):
         Actor.user = 'username'
         Actor.user = None
         self.assert_(Actor.user is None)
-        self.assert_(Actor.connection.user is None)
+        self.assertFalse(Actor.connection.user)
 
     def test_password_variable_can_be_reset(self):
         class Actor(activeresource.ActiveResource): pass
@@ -296,7 +296,7 @@ class ActiveResourceTest(unittest.TestCase):
         Actor.password = 'password'
         Actor.password = None
         self.assert_(Actor.password is None)
-        self.assert_(Actor.connection.password is None)
+        self.assertFalse(Actor.connection.password)
 
     def test_timeout_variable_can_be_reset(self):
         class Actor(activeresource.ActiveResource): pass
