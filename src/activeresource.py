@@ -831,7 +831,8 @@ class ActiveResource(object):
             else:
                 # Add/update an attribute
                 self.attributes[name] = value
-        object.__setattr__(self, name, value)
+        else:
+            object.__setattr__(self, name, value)
 
     def __repr__(self):
         return '%s(%s)' % (self._singular, self.id)

@@ -369,6 +369,13 @@ class ActiveResourceTest(unittest.TestCase):
         self.person.timeout = 10
         self.assert_(self.person.connection is Actor.connection)
 
+    def test_repeated_attribute_modification_updates_attributes_dict(self):
+        res = activeresource.ActiveResource()
+        res.name = 'first'
+        res.name = 'second'
+        res.name = 'third'
+        self.assertEqual('third', res.attributes['name'])
+
 
 if __name__ == '__main__':
     unittest.main()
