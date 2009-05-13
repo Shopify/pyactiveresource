@@ -503,7 +503,8 @@ class ActiveResource(object):
             A list of ActiveResource objects.
         """
         resources = []
-        for element in elements:
+        # slice elements to ensure that this is a list-type object not a dict
+        for element in elements[:]:
             resources.append(cls(element, prefix_options))
         return resources
 

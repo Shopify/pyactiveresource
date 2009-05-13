@@ -84,23 +84,20 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual([self.arnold, self.eb],
                          [p.attributes for p in people])
 
-    # TODO(mrroach): Re-enable this test for full ARes 2 compatibility
-    #def test_find_parses_non_array_collection(self):
-    #    collection_xml = '''<people>
-    #            <person><name>bob</name><id>1</id></person>
-    #            <person><name>jim</name><id>2</id></person>
-    #          </people>'''
-    #    self.http.respond_to('GET', '/people.xml', {}, collection_xml)
-    #    self.assertRaises(Exception, self.person.find)
+    def test_find_parses_non_array_collection(self):
+        collection_xml = '''<people>
+                <person><name>bob</name><id>1</id></person>
+                <person><name>jim</name><id>2</id></person>
+              </people>'''
+        self.http.respond_to('GET', '/people.xml', {}, collection_xml)
+        self.assertRaises(Exception, self.person.find)
 
-
-    # TODO(mrroach): Re-enable this test for full ARes 2 compatibility
-    #def test_find_parses_single_item_non_array_collection(self):
-    #    collection_xml = '''<people>
-    #            <person><name>jim</name><id>2</id></person>
-    #          </people>'''
-    #    self.http.respond_to('GET', '/people.xml', {}, collection_xml)
-    #    self.assertRaises(Exception, self.person.find)
+    def test_find_parses_single_item_non_array_collection(self):
+        collection_xml = '''<people>
+                <person><name>jim</name><id>2</id></person>
+              </people>'''
+        self.http.respond_to('GET', '/people.xml', {}, collection_xml)
+        self.assertRaises(Exception, self.person.find)
 
     def test_find_by_id(self):
         # Return a single person for a find(id=<id>) call
