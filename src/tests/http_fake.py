@@ -22,6 +22,17 @@ def initialize():
     urllib2.install_opener(opener)
 
 
+def capitalize_keys(dictionary):
+    """Capitalize a dictionary's keys.
+
+    Args:
+      dictionary: The dictionary to convert.
+    Returns:
+      A dictionary with capitalized keys.
+    """
+    return dict([(k.capitalize(), v) for k, v in dictionary.iteritems()])
+
+
 class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
     """A urllib2 handler object which returns a predefined response."""
 
@@ -55,7 +66,8 @@ class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
         Returns:
             None
         """
-        key = (method, urlparse.urljoin(cls.site, path), request_headers)
+        key = (method, urlparse.urljoin(cls.site, path),
+               capitalize_keys(request_headers))
         value = (code, body, response_headers)
         cls._response_map[str(key)] = value
 
@@ -75,7 +87,7 @@ class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
         if self._response_map:
             key = (request.get_method(),
                    request.get_full_url(),
-                   request.headers)
+                   capitalize_keys(request.headers))
             if str(key) in self._response_map:
                 (code, body, response_headers) = self._response_map[str(key)]
                 return FakeResponse(code, body, response_headers) 

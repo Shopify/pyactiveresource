@@ -50,6 +50,8 @@ class ActiveResourceTest(unittest.TestCase):
         self.http = http_fake.TestHandler
         self.http.set_response(Error('Bad request'))
         self.http.site = 'http://localhost'
+        self.zero_length_content_headers = {'Content-length': '0',
+                                            'Content-type': 'application/xml'}
 
         class Person(activeresource.ActiveResource):
             _site = 'http://localhost'
@@ -166,7 +168,8 @@ class ActiveResourceTest(unittest.TestCase):
                          self.person.get('retrieve', name='Matz' ))
 
     def test_class_post(self):
-        self.http.respond_to('POST', '/people/hire.xml?name=Matz', {}, '')
+        self.http.respond_to('POST', '/people/hire.xml?name=Matz',
+                             self.zero_length_content_headers, '')
         self.assertEqual(connection.Response(200, ''),
                          self.person.post('hire', name='Matz'))
 
@@ -178,7 +181,7 @@ class ActiveResourceTest(unittest.TestCase):
 
     def test_class_put_nested(self):
         self.http.respond_to('PUT', '/people/1/addresses/sort.xml?by=name',
-                             {}, '')
+                             self.zero_length_content_headers, '')
         self.assertEqual(connection.Response(200, ''),
                          self.address.put('sort', person_id=1, by='name'))
 
@@ -205,7 +208,8 @@ class ActiveResourceTest(unittest.TestCase):
             connection.Response(200, ''), ryan.post('register'))
 
     def test_instance_post(self):
-        self.http.respond_to('POST', '/people/1/register.xml', {}, self.matz)
+        self.http.respond_to('POST', '/people/1/register.xml',
+                             self.zero_length_content_headers, self.matz)
         matz = self.person({'id': 1, 'name': 'Matz'})
         self.assertEqual(connection.Response(200, self.matz),
                          matz.post('register'))
@@ -224,7 +228,7 @@ class ActiveResourceTest(unittest.TestCase):
             'GET', '/people/1/addresses/1.xml', {}, self.addy)
         self.http.respond_to(
             'PUT', '/people/1/addresses/1/normalize_phone.xml?locale=US',
-            {}, '', 204)
+            self.zero_length_content_headers, '', 204)
 
         self.assertEqual(
             connection.Response(204, ''),

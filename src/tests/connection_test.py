@@ -35,6 +35,9 @@ class ConnectionTest(unittest.TestCase):
         self.http.site = 'http://localhost'
         self.http.set_response(Error('Bad request'))
 
+        self.zero_length_content_headers = {'Content-Length': '0',
+                                            'Content-Type': 'application/xml'}
+
         self.header = {'Key': 'value'}
         self.connection = connection.Connection(self.http.site)
     
@@ -137,12 +140,14 @@ class ConnectionTest(unittest.TestCase):
   
     def test_post(self):
         self.http.respond_to(
-            'POST', '/people.xml', {},
+            'POST', '/people.xml', self.zero_length_content_headers,
             '', 200, {'Location': '/people/5.xml'})
         response = self.connection.post('/people.xml')
         self.assertEqual('/people/5.xml', response['Location'])
   
     def test_post_with_header(self):
+        header = self.header
+        header.update(self.zero_length_content_headers)
         self.http.respond_to(
             'POST', '/members.xml', self.header,
             '', 201, {'Location': '/people/6.xml'})
@@ -150,12 +155,15 @@ class ConnectionTest(unittest.TestCase):
         self.assertEqual('/people/6.xml', response['Location'])
   
     def test_put(self):
-        self.http.respond_to('PUT', '/people/1.xml', {}, '', 204)
+        self.http.respond_to('PUT', '/people/1.xml',
+                             self.zero_length_content_headers, '', 204)
         response = self.connection.put('/people/1.xml')
         self.assertEqual(204, response.code)
   
     def test_put_with_header(self):
-        self.http.respond_to('PUT', '/people/2.xml', self.header, '', 204)
+        header = self.header
+        header.update(self.zero_length_content_headers)
+        self.http.respond_to('PUT', '/people/2.xml', header, '', 204)
         response = self.connection.put('/people/2.xml', self.header)
         self.assertEqual(204, response.code)
   

@@ -243,6 +243,10 @@ class Connection(object):
             request.add_header('Content-Type', self.format.mime_type)
             request.add_data(data)
             self.log.debug('request-body:%s', request.get_data())
+        elif method in ['POST', 'PUT']:
+          # Some web servers need a content length on all POST/PUT operations
+          request.add_header('Content-Type', self.format.mime_type)
+          request.add_header('Content-Length', '0')
         if self.timeout:
             # This is lame, and urllib2 sucks for not giving a good way to do this
             old_timeout = socket.getdefaulttimeout()
