@@ -680,21 +680,6 @@ class ActiveResource(object):
         options = dict([(k, options.get(k, '')) for k in keys])
         return template.safe_substitute(options)
 
-    @classmethod
-    def _scrub_name(cls, name):
-        """Remove invalid characters from attribute names.
-
-        Args:
-            name: the string to scrub
-        Returns:
-            The part of the string that is a valid name, or None if unscrubbable
-        """
-        name = name.lower().replace('-', '_')
-        match = VALID_NAME.search(name)
-        if match:
-            return match.group(0)
-        return None
-
     # Public instance methods
     def to_dict(self):
         """Convert the object to a dictionary."""
@@ -865,7 +850,6 @@ class ActiveResource(object):
                 attr = value
             # Store the actual value in the attributes dictionary
             self.attributes[key] = attr
-            attr_name = self._scrub_name(key)
 
     def _find_class_for(self, element_name=None, class_name=None):
         """Look in the parent modules for classes matching the element name.
