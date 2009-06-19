@@ -298,9 +298,16 @@ def xml_to_dict(xmlobj, saveroot=False):
         if date_parse:
             return date_parse(element.text)
         else:
-            timestamp = calendar.timegm(
-                    time.strptime(element.text, '%Y-%m-%dT%H:%M:%S+0000'))
-            return datetime.datetime.utcfromtimestamp(timestamp)
+            try:
+                timestamp = calendar.timegm(
+                        time.strptime(element.text, '%Y-%m-%dT%H:%M:%S+0000'))
+
+                return datetime.datetime.utcfromtimestamp(timestamp)
+            except ValueError, err:
+                raise Error('Unable to parse timestamp. Install dateutil'
+                            ' (http://labix.org/python-dateutil) or'
+                            ' pyxml (http://pyxml.sf.net/topics/)'
+                            ' for ISO8601 support.')
     elif element_type == 'date':
         time_tuple = time.strptime(element.text, '%Y-%m-%d')
         return datetime.date(*time_tuple[:3])
@@ -314,7 +321,7 @@ def xml_to_dict(xmlobj, saveroot=False):
         return element.text.strip() in ('true', '1')
     elif element_type == 'yaml':
         if not yaml:
-            raise ImportError("PyYaml is not installed: http://pyyaml.org/")
+            raise ImportError('PyYaml is not installed: http://pyyaml.org/')
         return yaml.safe_load(element.text)
     elif element_type == 'base64binary':
         return base64.decodestring(element.text)
