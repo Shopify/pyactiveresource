@@ -217,6 +217,10 @@ class UtilTest(unittest.TestCase):
         self.assertEqual({'products': [{'made_in': 'Germany'}]},
                          util.xml_to_dict(product_xml, saveroot=True))
 
+    def test_to_xml_should_allow_unicode(self):
+        xml = util.to_xml({'data': u'\xe9'})
+        self.assert_('<data>&#233;</data>' in xml)
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -233,7 +233,7 @@ def to_xml(obj, root='object', pretty=False, header=True):
             else:
                 element = ET.SubElement(root_element, key)
                 if value is not None:
-                    element.text = str(value)
+                    element.text = unicode(value)
                     if isinstance(value, bool):
                         element.text = element.text.lower()
                         element.set('type', 'boolean')
