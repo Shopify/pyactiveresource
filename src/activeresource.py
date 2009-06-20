@@ -708,6 +708,19 @@ class ActiveResource(object):
         return util.to_xml(self.to_dict(), root=root,
                            header=header, pretty=pretty)
 
+    def reload(self):
+        """Connect to the server and update this resource's attributes.
+
+        Args:
+            None
+        Returns:
+            None
+        """
+        attributes = self.klass.connection.get(
+                self._element_path(self.id, self._prefix_options),
+                self.klass.headers)
+        self._update(attributes)
+
     def save(self):
         """Save the object to the server.
 

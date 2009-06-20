@@ -109,6 +109,14 @@ class ActiveResourceTest(unittest.TestCase):
         arnold = self.person.find(1)
         self.assertEqual(self.arnold, arnold.attributes)
 
+    def test_reload(self):
+        self.http.respond_to(
+            'GET', '/people/1.xml', {}, util.to_xml(self.arnold, root='person'))
+        arnold = self.person.find(1)
+        arnold.name = 'someone else'
+        arnold.reload()
+        self.assertEqual(self.arnold, arnold.attributes)
+
     def test_find_with_query_options(self):
         # Return a single-item people list for a find() call with kwargs
         self.http.respond_to(
