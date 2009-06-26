@@ -518,6 +518,8 @@ class ActiveResource(object):
             A string containing the encoded query.
         """
         if query_options:
+            query_options = dict([(key, val.encode('utf-8'))
+                                 for key, val in query_options.items()])
             return '?' + urllib.urlencode(query_options)
         else:
             return ''
