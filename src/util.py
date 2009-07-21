@@ -108,6 +108,19 @@ IRREGULAR = [
 UNCOUNTABLES = ['equipment', 'information', 'rice', 'money', 'species',
                 'series', 'fish', 'sheep']
 
+# An array of type-specific serializer methods which will be passed the value
+# and should return the element type and modified value.
+SERIALIZERS = [
+    {'type': bool,
+     'method': lambda value: ('boolean', unicode(value).lower())},
+    {'type': int,
+     'method': lambda value: ('integer', unicode(value))}]
+
+DEFAULT_SERIALIZER = {
+    'type': object,
+    'method': lambda value: (None, unicode(value))}
+
+
 class Error(Exception):
     """Base exception class for this module."""
 
@@ -207,6 +220,27 @@ def xml_pretty_format(element, level=0):
             element.tail = indent
 
 
+def serialize(value, element):
+    """Write a serialized value to an xml element.
+
+    Args:
+        value: The value to serialize.
+        element: An xml element to write to.
+    Returns:
+        None
+    """
+    if value is None:
+      element.set('nil', 'true')
+      return
+
+    for serializer in SERIALIZERS + [DEFAULT_SERIALIZER]:
+        if isinstance(value, serializer['type']):
+            element_type, element.text = serializer['method'](value)
+            if element_type:
+                element.set('type', element_type)
+            break
+ 
+    
 def to_xml(obj, root='object', pretty=False, header=True):
     """Convert a dictionary or list to an XML string.
     
@@ -232,15 +266,7 @@ def to_xml(obj, root='object', pretty=False, header=True):
                 root_element.append(element)
             else:
                 element = ET.SubElement(root_element, key)
-                if value is not None:
-                    element.text = unicode(value)
-                    if isinstance(value, bool):
-                        element.text = element.text.lower()
-                        element.set('type', 'boolean')
-                    elif isinstance(value, int):
-                        element.set('type', 'integer')
-                else:
-                    element.set('nil', 'true')
+                serialize(value, element)
     if pretty:
         xml_pretty_format(root_element)
     xml_data = ET.tostring(root_element)
