@@ -239,8 +239,8 @@ def serialize(value, element):
             if element_type:
                 element.set('type', element_type)
             break
- 
-    
+
+
 def to_xml(obj, root='object', pretty=False, header=True):
     """Convert a dictionary or list to an XML string.
     
