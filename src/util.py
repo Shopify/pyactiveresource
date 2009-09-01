@@ -23,7 +23,7 @@ except ImportError:
         from xml.utils import iso8601
         def date_parse(time_string):
             """Return a datetime object for the given ISO8601 string.
-            
+
             Args:
                 time_string: An ISO8601 timestamp.
             Returns:
@@ -132,15 +132,15 @@ class FileObject(object):
                  content_type='application/octet-stream'):
         self.data = data
         self.name = name
-        self.content_type = content_type 
+        self.content_type = content_type
 
 
 def pluralize(singular):
     """Convert singular word to its plural form.
-    
+
     Args:
         singular: A word in its singular form.
-    
+
     Returns:
         The word in its plural form.
     """
@@ -155,7 +155,7 @@ def pluralize(singular):
 
 def singularize(plural):
     """Convert plural word to its singular form.
-    
+
     Args:
         plural: A word in its plural form.
     Returns:
@@ -174,7 +174,7 @@ def singularize(plural):
 
 def camelize(word):
     """Convert a word from lower_with_underscores to CamelCase.
-    
+
     Args:
         word: The string to convert.
     Returns:
@@ -186,7 +186,7 @@ def camelize(word):
 
 def underscore(word):
     """Convert a word from CamelCase to lower_with_underscores.
-    
+
     Args:
         word: The string to convert.
     Returns:
@@ -198,7 +198,7 @@ def underscore(word):
 
 def xml_pretty_format(element, level=0):
     """Add PrettyPrint formatting to an ElementTree element.
-    
+
     Args:
         element: An ElementTree element which is modified in-place.
     Returns:
@@ -243,7 +243,7 @@ def serialize(value, element):
 
 def to_xml(obj, root='object', pretty=False, header=True):
     """Convert a dictionary or list to an XML string.
-    
+
     Args:
         obj: The dictionary/list object to convert.
         root: The name of the root xml element.
@@ -315,7 +315,7 @@ def xml_to_dict(xmlobj, saveroot=False):
 
     elif element.get('nil') == 'true':
         return None
-    elif element_type in ('integer', 'datetime', 'date', 
+    elif element_type in ('integer', 'datetime', 'date',
                           'decimal', 'double', 'float') and not element.text:
         return None
     elif element_type == 'integer':
@@ -360,15 +360,13 @@ def xml_to_dict(xmlobj, saveroot=False):
         if not element.text:
             return ''
         return element.text
-    elif element_type:
-        attributes = dict(element.items())
-        for child in element.getchildren():
-            attributes[child.tag.replace('-', '_')] = child.text
-        return attributes
     elif element.getchildren():
         # This is an element with children. The children might be simple
         # values, or nested hashes.
-        attributes = {}
+        if element_type:
+            attributes = dict(element.items())
+        else:
+            attributes = {}
         for child in element.getchildren():
             attribute = xml_to_dict(child, saveroot)
             child_tag = child.tag.replace('-', '_')
