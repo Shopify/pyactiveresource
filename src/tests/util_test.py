@@ -186,6 +186,15 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(expected_bacon_dict,
                          util.xml_to_dict(bacon_xml, saveroot=True)['bacon'])
 
+    def test_xml_to_dict_should_parse_dictionaries_with_unknown_types(self):
+        xml = '''<records type="array">
+                   <record type="MiscData">
+                     <name>misc_data1</name>
+                   </record>
+                 </records>'''
+        expected = {'records': [{'type': 'MiscData', 'name': 'misc_data1'}]}
+        self.assertEqual(expected, util.xml_to_dict(xml, saveroot=True))
+
     def test_xml_to_dict_parses_datetime_timezones(self):
         blog_xml = '''<blog>
             <posted_at type="datetime">2008-09-05T13:34-0700</posted_at>
