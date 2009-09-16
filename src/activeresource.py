@@ -808,12 +808,12 @@ class ActiveResource(object):
         Raises:
             AttributeError: if no such attribute exists.
         """
-        #TODO(mrroach): Use descriptors instead of __getattr__
-        if name == 'id':
-            # id should always be getattrable
-            return self.attributes.get('id')
-        if name in self.attributes:
-            return self.attributes[name]
+        if 'attributes' in self.__dict__:
+            if name == 'id':
+                # id should always be getattrable
+                return self.attributes.get('id')
+            if name in self.attributes:
+                return self.attributes[name]
         raise AttributeError(name)
 
     def __setattr__(self, name, value):

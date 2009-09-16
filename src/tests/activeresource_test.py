@@ -6,6 +6,7 @@
 __author__ = 'Mark Roach (mrroach@google.com)'
 
 import unittest
+import pickle
 from pyactiveresource import activeresource
 from pyactiveresource import connection
 from pyactiveresource import util
@@ -355,33 +356,33 @@ class ActiveResourceTest(unittest.TestCase):
 
     def test_updating_superclass_site_resets_descendent_connection(self):
         class Actor(self.person): pass
-        
+
         self.assert_(self.person.connection is Actor.connection)
-        
+
         self.person.site = 'http://another-site'
         self.assert_(self.person.connection is Actor.connection)
-    
+
     def test_updating_superclass_user_resets_descendent_connection(self):
         class Actor(self.person): pass
-        
+
         self.assert_(self.person.connection is Actor.connection)
-        
+
         self.person.user = 'username'
         self.assert_(self.person.connection is Actor.connection)
-    
+
     def test_updating_superclass_password_resets_descendent_connection(self):
         class Actor(self.person): pass
-        
+
         self.assert_(self.person.connection is Actor.connection)
-        
+
         self.person.password = 'password'
         self.assert_(self.person.connection is Actor.connection)
 
     def test_updating_superclass_timeout_resets_descendent_connection(self):
         class Actor(self.person): pass
-        
+
         self.assert_(self.person.connection is Actor.connection)
-        
+
         self.person.timeout = 10
         self.assert_(self.person.connection is Actor.connection)
 
@@ -391,6 +392,12 @@ class ActiveResourceTest(unittest.TestCase):
         res.name = 'second'
         res.name = 'third'
         self.assertEqual('third', res.attributes['name'])
+
+    def test_resources_should_be_picklable_and_unpicklable(self):
+        res = activeresource.ActiveResource({'name': 'resource', 'id': 5})
+        pickle_string = pickle.dumps(res)
+        unpickled = pickle.loads(pickle_string)
+        self.assertEqual(res, unpickled)
 
 
 if __name__ == '__main__':
