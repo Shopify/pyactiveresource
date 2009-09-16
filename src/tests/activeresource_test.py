@@ -134,6 +134,13 @@ class ActiveResourceTest(unittest.TestCase):
         arnold = self.person.find_first(name=u'\xc3\xe9')
         self.assertEqual(self.arnold, arnold.attributes)
 
+    def test_find_should_handle_integer_query_args(self):
+        self.http.respond_to(
+            'GET', '/people.xml?employee_id=12345', {},
+            util.to_xml([self.arnold], root='people'))
+        arnold = self.person.find_first(employee_id=12345)
+        self.assertEqual(self.arnold, arnold.attributes)
+
     def test_find_with_prefix_options(self):
         # Paths for prefix_options related requests
         self.http.respond_to(

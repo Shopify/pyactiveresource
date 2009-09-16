@@ -420,6 +420,8 @@ class ActiveResource(object):
         prefix_options = {}
         query_options = {}
         for key, value in options.items():
+            if isinstance(value, int):
+                value = str(value)
             if key in cls._prefix_parameters():
                 prefix_options[key] = value
             else:
