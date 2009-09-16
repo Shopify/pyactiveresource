@@ -471,11 +471,13 @@ class ActiveResource(object):
         Returns:
             A list of resources.
         """
+        prefix_options, query_options = cls._split_options(kwargs)
         if from_:
-            path = from_ + cls._query_string(kwargs)
+            query_options.update(prefix_options)
+            path = from_ + cls._query_string(query_options)
             prefix_options = None
         else:
-            prefix_options, query_options = cls._split_options(kwargs)
+
             path = cls._collection_path(prefix_options, query_options)
         return cls._build_list(cls.connection.get(path, cls.headers),
                                prefix_options)
