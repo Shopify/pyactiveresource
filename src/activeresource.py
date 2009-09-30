@@ -870,7 +870,8 @@ class ActiveResource(object):
             # Store the actual value in the attributes dictionary
             self.attributes[key] = attr
 
-    def _find_class_for(self, element_name=None, class_name=None):
+    @classmethod
+    def _find_class_for(cls, element_name=None, class_name=None):
         """Look in the parent modules for classes matching the element name.
 
         One, or both of element/class name must be specified.
@@ -888,7 +889,7 @@ class ActiveResource(object):
         elif not class_name:
             class_name = util.camelize(element_name)
 
-        module_path = self.__module__.split('.')
+        module_path = cls.__module__.split('.')
         for depth in range(len(module_path), 0, -1):
             try:
                 __import__('.'.join(module_path[:depth]))
@@ -912,8 +913,8 @@ class ActiveResource(object):
                     continue
 
         # If we made it this far, no such class was found
-        return new.classobj(class_name, (self.__class__,),
-                            {'__module__': self.__module__})
+        return new.classobj(class_name, (cls,),
+                            {'__module__': cls.__module__})
 
     # methods corresponding to Ruby's custom_methods
     def _custom_method_element_url(self, method_name, options):
