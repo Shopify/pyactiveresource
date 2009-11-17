@@ -406,6 +406,19 @@ class ActiveResourceTest(unittest.TestCase):
         unpickled = pickle.loads(pickle_string)
         self.assertEqual(res, unpickled)
 
+    def test_to_dict_should_handle_attributes_containing_lists_of_dicts(self):
+        children = [{'name': 'child1'}, {'name': 'child2'}]
+        res = activeresource.ActiveResource()
+        res.children = children
+        self.assertEqual(children, res.to_dict()['children'])
+
+    def test_to_xml_should_handle_attributes_containing_lists_of_dicts(self):
+        children = [{'name': 'child1'}, {'name': 'child2'}]
+        res = activeresource.ActiveResource()
+        res.children = children
+        xml = res.to_xml()
+        self.assertEqual(children, util.xml_to_dict(xml)['children'])
+
 
 if __name__ == '__main__':
     unittest.main()

@@ -692,7 +692,13 @@ class ActiveResource(object):
         values = {}
         for key, value in self.attributes.iteritems():
             if isinstance(value, list):
-                values[key] = [i.to_dict() for i in value]
+                new_value = []
+                for i in value:
+                  if isinstance(i, dict):
+                      new_value.append(i)
+                  else:
+                      new_value.append(i.to_dict())
+                values[key] = new_value
             elif isinstance(value, ActiveResource):
                 values[key] = value.to_dict()
             else:
