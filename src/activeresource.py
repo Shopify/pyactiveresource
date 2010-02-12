@@ -420,8 +420,12 @@ class ActiveResource(object):
         prefix_options = {}
         query_options = {}
         for key, value in options.items():
-            if not isinstance(value, basestring):
-                value = str(value)
+            if isinstance(value, list):
+                key = '%s[]' % key
+            elif not isinstance(value, basestring):
+                value = str(value).encode('utf-8')
+            else:
+                value = value.encode('utf-8')
             if key in cls._prefix_parameters():
                 prefix_options[key] = value
             else:
@@ -522,9 +526,7 @@ class ActiveResource(object):
             A string containing the encoded query.
         """
         if query_options:
-            query_options = dict([(key, val.encode('utf-8'))
-                                 for key, val in query_options.items()])
-            return '?' + urllib.urlencode(query_options)
+            return '?' + urllib.urlencode(query_options, True)
         else:
             return ''
 
