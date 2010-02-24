@@ -389,6 +389,9 @@ def xml_to_dict(xmlobj, saveroot=False):
             return {element.tag.replace('-', '_'): attributes}
         else:
             return attributes
+    elif element.items():
+        attributes = dict(element.items())
+        return {element.tag.replace('-', '_'): attributes}
     else:
         return element.text
 

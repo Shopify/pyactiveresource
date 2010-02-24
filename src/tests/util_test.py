@@ -195,6 +195,12 @@ class UtilTest(unittest.TestCase):
         expected = {'records': [{'type': 'MiscData', 'name': 'misc_data1'}]}
         self.assertEqual(expected, util.xml_to_dict(xml, saveroot=True))
 
+    def test_xml_to_dict_should_include_xml_attributes_as_dictionary_items(self):
+        xml = '''<record><child name="child_name" id="1234" /></record>'''
+        result = util.xml_to_dict(xml, saveroot=True)
+        self.assertEqual('child_name', result['record']['child']['name'])
+        self.assertEqual('1234', result['record']['child']['id'])
+
     def test_xml_to_dict_parses_datetime_timezones(self):
         blog_xml = '''<blog>
             <posted_at type="datetime">2008-09-05T13:34-0700</posted_at>
