@@ -435,6 +435,11 @@ class ActiveResourceTest(unittest.TestCase):
         xml = res.to_xml()
         self.assertEqual(children, util.xml_to_dict(xml)['children'])
 
+    def test_to_xml_should_handle_dasherize_option(self):
+        res = activeresource.ActiveResource({'attr_name': 'value'})
+        xml = res.to_xml(dasherize=False)
+        self.assert_('<attr_name>value</attr_name>' in xml)
+
 
 if __name__ == '__main__':
     unittest.main()

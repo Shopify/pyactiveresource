@@ -707,20 +707,22 @@ class ActiveResource(object):
                 values[key] = value
         return values
 
-    def to_xml(self, root=None, header=True, pretty=False):
+    def to_xml(self, root=None, header=True, pretty=False, dasherize=True):
         """Convert the object to an xml string.
 
         Args:
             root: The name of the root element for xml output.
             header: Whether to include the xml header.
             pretty: Whether to "pretty-print" format the output.
+            dasherize: Whether to dasherize the xml attribute names.
         Returns:
             An xml string.
         """
         if not root:
             root = self._singular
         return util.to_xml(self.to_dict(), root=root,
-                           header=header, pretty=pretty)
+                           header=header, pretty=pretty,
+                           dasherize=dasherize)
 
     def reload(self):
         """Connect to the server and update this resource's attributes.
