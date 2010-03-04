@@ -241,16 +241,21 @@ def serialize(value, element):
             break
 
 
-def to_xml(obj, root='object', pretty=False, header=True):
+def to_xml(obj, root='object', pretty=False, header=True, dasherize=True):
     """Convert a dictionary or list to an XML string.
 
     Args:
         obj: The dictionary/list object to convert.
         root: The name of the root xml element.
+        pretty: Whether to pretty-format the xml (default False).
+        header: Whether to include an xml header (default True).
+        dasherize: Whether to convert underscores to dashes in
+                   attribute names (default True).
     Returns:
         An xml string.
     """
-    root_element = ET.Element(root.replace('_', '-'))
+    root = dasherize and root.replace('_', '-') or root
+    root_element = ET.Element(root)
     if isinstance(obj, list):
         root_element.set('type', 'array')
         for i in obj:
@@ -259,7 +264,7 @@ def to_xml(obj, root='object', pretty=False, header=True):
             root_element.append(element)
     else:
         for key, value in obj.iteritems():
-            key = key.replace('_', '-')
+            key = dasherize and key.replace('_', '-') or key
             if isinstance(value, dict) or isinstance(value, list):
                 element = ET.fromstring(
                     to_xml(value, root=key, header=False))
