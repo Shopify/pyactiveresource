@@ -253,11 +253,12 @@ class Connection(object):
             socket.setdefaulttimeout(self.timeout)
         try:
             try:
-                response = Response.from_httpresponse(urllib2.urlopen(request))
+                http_response = self._handle_error(urllib2.urlopen(request))
             except urllib2.HTTPError, err:
-                response = Response.from_httpresponse(self._handle_error(err))
+                http_response = self._handle_error(err)
             except urllib2.URLError, err:
                 raise Error(err, url)
+            response = Response.from_httpresponse(http_response)
         finally:
             if self.timeout:
                 socket.setdefaulttimeout(old_timeout)
