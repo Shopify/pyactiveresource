@@ -881,18 +881,17 @@ class ActiveResource(object):
             self.attributes[key] = attr
 
     @classmethod
-    def _find_class_for_collection(cls, name):
+    def _find_class_for_collection(cls, collection_name):
         """Look in the parent modules for classes matching the element name.
 
         One or both of element/class name must be specified.
 
         Args:
-            element_name: The name of the element type.
-            class_name: The class name of the element type.
+            collection_name: The name of the collection type.
         Returns:
             A Resource class.
         """
-        return cls._find_class_for(util.singularize(name))
+        return cls._find_class_for(util.singularize(collection_name))
 
     @classmethod
     def _find_class_for(cls, element_name=None, class_name=None):
