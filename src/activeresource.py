@@ -873,7 +873,7 @@ class ActiveResource(object):
                 klass = self._find_class_for(key)
                 attr = klass(value)
             elif isinstance(value, list):
-                klass = self._find_class_for(util.singularize(key))
+                klass = self._find_class_for_collection(key)
                 attr = [klass(child) for child in value]
             else:
                 attr = value
@@ -881,10 +881,24 @@ class ActiveResource(object):
             self.attributes[key] = attr
 
     @classmethod
+    def _find_class_for_collection(cls, name):
+        """Look in the parent modules for classes matching the element name.
+
+        One or both of element/class name must be specified.
+
+        Args:
+            element_name: The name of the element type.
+            class_name: The class name of the element type.
+        Returns:
+            A Resource class.
+        """
+        return cls._find_class_for(util.singularize(name))
+
+    @classmethod
     def _find_class_for(cls, element_name=None, class_name=None):
         """Look in the parent modules for classes matching the element name.
 
-        One, or both of element/class name must be specified.
+        One or both of element/class name must be specified.
 
         Args:
             element_name: The name of the element type.
