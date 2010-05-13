@@ -249,6 +249,7 @@ class ResourceMeta(type):
         return cls._format
 
     def set_format(cls, value):
+        cls._connection = None
         cls._format = value
     format = property(get_format, set_format, None,
                        'A format object for encoding/decoding requests')
@@ -279,7 +280,7 @@ class ResourceMeta(type):
     def set_prefix_source(cls, value):
         """Set the prefix source, which will be rendered into the prefix."""
         cls._prefix_source = value
-    
+
     prefix_source = property(get_prefix_source, set_prefix_source, None,
                              'prefix for lookups for this type of object.')
 

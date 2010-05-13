@@ -338,6 +338,14 @@ class ActiveResourceTest(unittest.TestCase):
         self.assert_(Actor.password is None)
         self.assertFalse(Actor.connection.password)
 
+    def test_format_variable_can_by_reset(self):
+      class Actor(activeresource.ActiveResource): pass
+      Actor.site = 'http://cinema'
+      Actor.format = None
+      self.assert_(Actor.connection.format is None)
+      Actor.format = object()
+      self.assertEqual(Actor.format, Actor.connection.format)
+
     def test_timeout_variable_can_be_reset(self):
         class Actor(activeresource.ActiveResource): pass
         Actor.site = 'http://cinema'
