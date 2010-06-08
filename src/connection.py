@@ -259,6 +259,8 @@ class Connection(object):
             except urllib2.URLError, err:
                 raise Error(err, url)
             response = Response.from_httpresponse(http_response)
+            self.log.debug('Response(code=%d, headers=%s, msg="%s")',
+                           response.code, response.headers, response.msg)
         finally:
             if self.timeout:
                 socket.setdefaulttimeout(old_timeout)
