@@ -37,7 +37,7 @@ class ConnectionError(Error):
 class Redirection(ConnectionError):
     """HTTP 3xx redirection."""
     pass
-    
+
 
 class ClientError(ConnectionError):
     """An error caused by an ActiveResource client."""
@@ -203,7 +203,7 @@ class Connection(object):
 
         new_site = urlparse.urlunparse((proto, host, '', '', '', ''))
         return (new_site, user, password)
-    
+
     def _request(self, url):
         """Return a new request object.
 
