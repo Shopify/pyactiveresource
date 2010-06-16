@@ -401,7 +401,7 @@ class ActiveResource(object):
         Args:
             attributes: A dictionary of attributes which represent this object.
         Returns:
-            True if the resource is found, False otherwise.
+            The new resource (which may or may not have been saved successfully).
         """
         resource = cls(attributes)
         resource.save()
