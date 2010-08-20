@@ -253,7 +253,7 @@ class Connection(object):
             socket.setdefaulttimeout(self.timeout)
         try:
             try:
-                http_response = self._handle_error(urllib2.urlopen(request))
+                http_response = self._handle_error(self._urlopen(request))
             except urllib2.HTTPError, err:
                 http_response = self._handle_error(err)
             except urllib2.URLError, err:
@@ -268,6 +268,19 @@ class Connection(object):
         self.log.info('--> %d %s %db', response.code, response.msg,
                       len(response.body))
         return response
+
+    def _urlopen(self, request):
+        """Wrap calls to urllib2 so they can be overriden.
+
+        Args:
+            request: A Request object.
+        Returns:
+            An httplib.HTTPResponse object.
+        Raises:
+            urllib2.HTTPError on server errors.
+            urllib2.URLError on IO errors.
+        """
+        return urllib2.urlopen(request)
 
     def get(self, path, headers=None):
         """Perform an HTTP get request.
