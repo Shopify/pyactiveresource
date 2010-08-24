@@ -157,6 +157,22 @@ class ActiveResourceTest(unittest.TestCase):
       arnold = self.person.find_first(vars=['a', 'b', 'c'])
       self.assertEqual(self.arnold, arnold.attributes)
 
+    def test_find_should_handle_dictionary_query_args(self):
+      query = urllib.urlencode({'vars[key]': 'val'}, True)
+      self.http.respond_to(
+        'GET', '/people.xml?%s' % query, {},
+        util.to_xml([self.arnold], root='people'))
+      arnold = self.person.find_first(vars={'key': 'val'})
+      self.assertEqual(self.arnold, arnold.attributes)
+
+    def test_find_should_handle_dictionary_query_args_with_array_value(self):
+      query = urllib.urlencode({'vars[key][]': ['val1', 'val2']}, True)
+      self.http.respond_to(
+        'GET', '/people.xml?%s' % query, {},
+        util.to_xml([self.arnold], root='people'))
+      arnold = self.person.find_first(vars={'key': ['val1', 'val2']})
+      self.assertEqual(self.arnold, arnold.attributes)
+
     def test_find_with_prefix_options(self):
         # Paths for prefix_options related requests
         self.http.respond_to(

@@ -423,6 +423,12 @@ class ActiveResource(object):
         for key, value in options.items():
             if isinstance(value, list):
                 key = '%s[]' % key
+            elif isinstance(value, dict):
+                dict_options = {}
+                for dk, dv in value.items():
+                    dict_options['%s[%s]' % (key, dk)] = dv
+                query_options.update(cls._split_options(dict_options)[1])
+                continue
             elif not isinstance(value, basestring):
                 value = str(value).encode('utf-8')
             else:
