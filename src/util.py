@@ -8,6 +8,7 @@ __author__ = 'Mark Roach (mrroach@google.com)'
 import base64
 import calendar
 import decimal
+import element_containers
 import re
 import time
 import datetime
@@ -43,7 +44,7 @@ except ImportError:
         try:
             from xml.etree import ElementTree as ET
         except ImportError:
-            from elementtree import ElementTree as ET
+            from google3.third_party.python.elementtree import ElementTree as ET
 
 XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'
 
@@ -280,14 +281,14 @@ def to_xml(obj, root='object', pretty=False, header=True, dasherize=True):
     return xml_data
 
 
-def xml_to_dict(xmlobj, saveroot=False):
+def xml_to_dict(xmlobj, saveroot=True):
     """Parse the xml into a dictionary of attributes.
 
     Args:
         xmlobj: An ElementTree element or an xml string.
         saveroot: Keep the xml element names (ugly format)
     Returns:
-        A dictionary of attributes (possibly nested).
+        An ElementDict object or ElementList for multiple objects
     """
     if isinstance(xmlobj, basestring):
         # Allow for blank (usually HEAD) result on success
@@ -302,22 +303,20 @@ def xml_to_dict(xmlobj, saveroot=False):
 
     element_type = element.get('type', '').lower()
     if element_type == 'array':
-        # This is a list, build either a list, or an array like:
-        # {list_element_type: [list_element,...]}
+        element_list_type = element.tag.replace('-', '_')
+        return_list = element_containers.ElementList(element_list_type)
+        for child in element.getchildren():
+            child_element = xml_to_dict(child, saveroot)
+            if saveroot and isinstance(child_element, dict):
+                  return_list.append(child_element.values()[0])
+            else:
+                  return_list.append(child_element)
         if saveroot:
-            child_tag = singularize(element.tag.replace('-', '_'))
-            attributes = []
-            for child in element.getchildren():
-                attribute = xml_to_dict(child, saveroot)
-                if isinstance(attribute, dict):
-                    attribute = attribute.values()[0]
-                attributes.append(attribute)
-            return {element.tag.replace('-', '_'): attributes}
+            return element_containers.ElementDict(element_list_type,
+                                                  {element_list_type:
+                                                   return_list})
         else:
-            attributes = [xml_to_dict(e, saveroot)
-                          for e in element.getchildren()]
-            return attributes
-
+            return return_list
     elif element.get('nil') == 'true':
         return None
     elif element_type in ('integer', 'datetime', 'date',
@@ -369,9 +368,11 @@ def xml_to_dict(xmlobj, saveroot=False):
         # This is an element with children. The children might be simple
         # values, or nested hashes.
         if element_type:
-            attributes = dict(element.items())
+            attributes = element_containers.ElementDict(
+                underscore(element.get('type', '')), element.items())
         else:
-            attributes = {}
+            attributes = element_containers.ElementDict(singularize(
+                element.tag.replace('-', '_')))
         for child in element.getchildren():
             attribute = xml_to_dict(child, saveroot)
             child_tag = child.tag.replace('-', '_')
@@ -395,8 +396,8 @@ def xml_to_dict(xmlobj, saveroot=False):
         else:
             return attributes
     elif element.items():
-        attributes = dict(element.items())
-        return {element.tag.replace('-', '_'): attributes}
+        return element_containers.ElementDict(element.tag.replace('-', '_'),
+                                              element.items())
     else:
         return element.text
 
@@ -407,4 +408,3 @@ def main():
 
 if __name__ == '__main__':
     main()
-

@@ -12,6 +12,7 @@ import urllib2
 import urlparse
 from string import Template
 from pyactiveresource import connection
+from pyactiveresource import element_containers
 from pyactiveresource import formats
 from pyactiveresource import util
 
@@ -85,7 +86,7 @@ class Errors(object):
         attribute_keys = self.base.attributes.keys()
         try:
             messages = util.xml_to_dict(
-                    xml_string, saveroot=True)['errors']['error']
+                    xml_string)['errors']['error']
             if not isinstance(messages, list):
                 messages = [messages]
         except util.Error:
@@ -518,6 +519,8 @@ class ActiveResource(object):
             A list of ActiveResource objects.
         """
         resources = []
+        if isinstance(elements, dict):
+          elements = [elements]
         # slice elements to ensure that this is a list-type object not a dict
         for element in elements[:]:
             resources.append(cls(element, prefix_options))

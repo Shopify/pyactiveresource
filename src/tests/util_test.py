@@ -60,9 +60,9 @@ class UtilTest(unittest.TestCase):
             'optimum_viewing_angle': 135.0,
             'resident': 'yes'}
 
-        self.assertEqual(expected_topic_dict, util.xml_to_dict(topic_xml))
+        self.assertEqual(expected_topic_dict, util.xml_to_dict(topic_xml, saveroot=False))
         self.assertEqual(expected_topic_dict,
-                         util.xml_to_dict(topic_xml, saveroot=True)['topic'])
+                         util.xml_to_dict(topic_xml)['topic'])
 
     def test_xml_to_dict_multiple_records(self):
         """Test the xml to dict function."""
@@ -109,10 +109,47 @@ class UtilTest(unittest.TestCase):
           'parent_id': None}
 
         self.assertEqual(expected_topic_dict,
-                         util.xml_to_dict(topics_xml)[0])
+                         util.xml_to_dict(topics_xml, saveroot=False)[0])
         self.assertEqual(
                 expected_topic_dict,
                 util.xml_to_dict(topics_xml, saveroot=True)['topics'][0])
+
+    def test_xml_to_dict_multiple_records_with_different_types(self):
+        """Test the xml to dict function."""
+        topics_xml = '''<topics type="array">
+            <topic>
+              <title>The First Topic</title>
+              <author-name>David</author-name>
+              <id type="integer">1</id>
+              <approved type="boolean">false</approved>
+              <replies-count type="integer">0</replies-count>
+              <replies-close-in type="integer">2592000000</replies-close-in>
+              <written-on type="date">2003-07-16</written-on>
+              <viewed-at type="datetime">2003-07-16T09:28:00+0000</viewed-at>
+              <content>Have a nice day</content>
+              <author-email-address>david@loudthinking.com</author-email-address>
+              <parent-id nil="true"></parent-id>
+            </topic>
+            <topic type='SubTopic'>
+              <title>The Second Topic</title>
+              <author-name>Jason</author-name>
+              <id type="integer">1</id>
+              <approved type="boolean">false</approved>
+              <replies-count type="integer">0</replies-count>
+              <replies-close-in type="integer">2592000000</replies-close-in>
+              <written-on type="date">2003-07-16</written-on>
+              <viewed-at type="datetime">2003-07-16T09:28:00+0000</viewed-at>
+              <content>Have a nice day</content>
+              <author-email-address>david@loudthinking.com</author-email-address>
+              <parent-id></parent-id>
+            </topic>
+          </topics>'''
+
+        parsed = util.xml_to_dict(topics_xml, saveroot=False)
+        self.assertEqual('topics', parsed.element_type)
+        self.assertEqual('topic', parsed[0].element_type)
+        self.assertEqual('sub_topic', parsed[1].element_type)
+
 
     def test_xml_to_dict_empty_array(self):
         blog_xml = '''<blog>

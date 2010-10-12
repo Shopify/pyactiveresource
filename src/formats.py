@@ -5,7 +5,6 @@
 
 __author__ = 'Mark Roach (mrroach@google.com)'
 
-
 import logging
 from pyactiveresource import util
 
@@ -16,24 +15,23 @@ class Error(Exception):
 
 class Base(object):
     """A base format object for inheritance."""
-
+    
 
 class XMLFormat(Base):
     """Read XML formatted ActiveResource objects."""
-
+    
     extension = 'xml'
     mime_type = 'application/xml'
-
+    
     @staticmethod
     def decode(resource_string):
         """Convert a resource string to a dictionary."""
         log = logging.getLogger('pyactiveresource.format')
         log.debug('decoding resource: %s', resource_string)
         try:
-            data = util.xml_to_dict(resource_string, saveroot=True)
+            data = util.xml_to_dict(resource_string, saveroot=False)
         except util.Error, err:
             raise Error(err)
         if isinstance(data, dict) and len(data) == 1:
             data = data.values()[0]
         return data
-

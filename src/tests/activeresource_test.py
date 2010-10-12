@@ -94,14 +94,16 @@ class ActiveResourceTest(unittest.TestCase):
                 <person><name>jim</name><id>2</id></person>
               </people>'''
         self.http.respond_to('GET', '/people.xml', {}, collection_xml)
-        self.assertRaises(Exception, self.person.find)
+        results = self.person.find()
+        self.assertEqual(2, len(results))
 
     def test_find_parses_single_item_non_array_collection(self):
         collection_xml = '''<people>
                 <person><name>jim</name><id>2</id></person>
               </people>'''
         self.http.respond_to('GET', '/people.xml', {}, collection_xml)
-        self.assertRaises(Exception, self.person.find)
+        results = self.person.find()
+        self.assertEqual(1, len(results))
 
     def test_find_by_id(self):
         # Return a single person for a find(id=<id>) call
@@ -457,7 +459,8 @@ class ActiveResourceTest(unittest.TestCase):
         res = activeresource.ActiveResource()
         res.children = children
         xml = res.to_xml()
-        self.assertEqual(children, util.xml_to_dict(xml)['children'])
+        parsed = util.xml_to_dict(xml, saveroot=False)
+        self.assertEqual(children, parsed['children'])
 
     def test_to_xml_should_handle_dasherize_option(self):
         res = activeresource.ActiveResource({'attr_name': 'value'})
