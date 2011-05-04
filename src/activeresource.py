@@ -635,10 +635,10 @@ class ActiveResource(object):
 
     @classmethod
     def _class_put(cls, method_name, body='', **kwargs):
-        """Get a nested resource or resources.
+        """Update a nested resource or resources.
 
         Args:
-            method_name: the nested resource to retrieve.
+            method_name: the nested resource to update.
             body: The data to send as the body of the request.
             kwargs: Any keyword arguments for the query.
         Returns:
@@ -649,16 +649,29 @@ class ActiveResource(object):
 
     @classmethod
     def _class_delete(cls, method_name, **kwargs):
-        """Get a nested resource or resources.
+        """Delete a nested resource or resources.
 
         Args:
-            method_name: the nested resource to retrieve.
+            method_name: the nested resource to delete.
             kwargs: Any keyword arguments for the query.
         Returns:
             A connection.Response object.
         """
         url = cls._custom_method_collection_url(method_name, kwargs)
         return cls.connection.delete(url, cls.headers)
+
+    @classmethod
+    def _class_head(cls, method_name, **kwargs):
+        """Predicate a nested resource or resources exists.
+
+        Args:
+            method_name: the nested resource to predicate exists.
+            kwargs: Any keyword arguments for the query.
+        Returns:
+            A connection.Response object.
+        """
+        url = cls._custom_method_collection_url(method_name, kwargs)
+        return cls.connection.head(url, cls.headers)
 
     @classmethod
     def _prefix_parameters(cls):
@@ -1035,10 +1048,10 @@ class ActiveResource(object):
         return self.klass.connection.put(url, self.klass.headers, body)
 
     def _instance_delete(self, method_name, **kwargs):
-        """Get a nested resource or resources.
+        """Delete a nested resource or resources.
 
         Args:
-            method_name: the nested resource to retrieve.
+            method_name: the nested resource to delete.
             kwargs: Any keyword arguments for the query.
         Returns:
             A connection.Response object.
@@ -1046,8 +1059,21 @@ class ActiveResource(object):
         url = self._custom_method_element_url(method_name, kwargs)
         return self.klass.connection.delete(url, self.klass.headers)
 
+    def _instance_head(self, method_name, **kwargs):
+        """Predicate a nested resource or resources exists.
+
+        Args:
+            method_name: the nested resource to predicate exists.
+            kwargs: Any keyword arguments for the query.
+        Returns:
+            A connection.Response object.
+        """
+        url = self._custom_method_element_url(method_name, kwargs)
+        return self.klass.connection.head(url, self.klass.headers)
+
     # Create property which returns class/instance method based on context
     get = ClassAndInstanceMethod('_class_get', '_instance_get')
     post = ClassAndInstanceMethod('_class_post', '_instance_post')
     put = ClassAndInstanceMethod('_class_put', '_instance_put')
     delete = ClassAndInstanceMethod('_class_delete', '_instance_delete')
+    head = ClassAndInstanceMethod('_class_head', '_instance_head')

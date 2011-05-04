@@ -248,6 +248,12 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(connection.Response(200, ''),
                          self.person.delete('deactivate', name='Matz'))
 
+    def test_class_head(self):
+        self.http.respond_to('HEAD', '/people/retrieve.xml?name=Matz',
+                             {}, '')
+        self.assertEqual(connection.Response(200, ''),
+                         self.person.head('retrieve', name='Matz'))
+
     def test_instance_get(self):
         self.http.respond_to('GET', '/people/1.xml', {}, self.matz)
         self.http.respond_to('GET', '/people/1/shallow.xml', {}, self.matz)
@@ -305,6 +311,10 @@ class ActiveResourceTest(unittest.TestCase):
         self.http.respond_to('GET', '/people/1.xml', {}, self.matz)
         self.http.respond_to('DELETE', '/people/1/deactivate.xml', {}, '')
         self.assertEqual('', self.person.find(1).delete('deactivate').body)
+
+    def test_instance_head(self):
+        self.http.respond_to('HEAD', '/people/1.xml', {}, self.matz)
+        self.person.head('1')
 
     def test_save_should_get_id_from_location(self):
         self.http.respond_to(
