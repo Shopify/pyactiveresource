@@ -115,6 +115,8 @@ SERIALIZERS = [
     {'type': bool,
      'method': lambda value: ('boolean', unicode(value).lower())},
     {'type': int,
+     'method': lambda value: ('integer', unicode(value))},
+    {'type': long,
      'method': lambda value: ('integer', unicode(value))}]
 
 DEFAULT_SERIALIZER = {
