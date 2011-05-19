@@ -14,7 +14,7 @@ from pyactiveresource import formats
 class Error(Exception):
     """A general error derived from Exception."""
 
-    def __init__(self, msg, url=None, code=None):
+    def __init__(self, msg=None, url=None, code=None):
         Exception.__init__(self, msg)
         self.url = url
         self.code = code
@@ -24,8 +24,11 @@ class ServerError(Error):
     """An error caused by an ActiveResource server."""
     # HTTP error code 5xx (500..599)
 
-    def __init__(self, response):
-        Error.__init__(self, response.msg, response.url, response.code)
+    def __init__(self, response=None):
+        if response is not None:
+            Error.__init__(self, response.msg, response.url, response.code)
+        else:
+            Error.__init__(self)
 
 
 class ConnectionError(Error):
@@ -72,7 +75,7 @@ class ResourceNotFound(ClientError):
     # 404 Resource Not Found
 
     def __init__(self, response=None, message=None):
-        if message is None:
+        if response is not None and message is None:
             message = '%s: %s' % (response.msg, response.url)
 
         ClientError.__init__(self, response=response, message=message)
