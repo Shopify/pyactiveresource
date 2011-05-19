@@ -13,13 +13,18 @@ from pyactiveresource import formats
 
 class Error(Exception):
     """A general error derived from Exception."""
-    pass
+
+    def __init__(self, msg, url):
+      Exception.__init__(self, msg)
+      self.url = url
 
 
 class ServerError(Error):
     """An error caused by an ActiveResource server."""
     # HTTP error code 5xx (500..599)
-    pass
+
+    def __init__(self, response):
+      Error.__init__(self, response.msg, response.url)
 
 
 class ConnectionError(Error):
@@ -27,11 +32,13 @@ class ConnectionError(Error):
     def __init__(self, response=None, message=None):
         if not response:
           self.response = Response(None, '')
+          url = None
         else:
           self.response = Response.from_httpresponse(response)
+          url = response.url
         if not message:
-            message = str(response)
-        Error.__init__(self, message)
+            message = str(self.response)
+        Error.__init__(self, message, url)
 
 
 class Redirection(ConnectionError):
@@ -60,7 +67,11 @@ class ResourceInvalid(ClientError):
 class ResourceNotFound(ClientError):
     """An error raised when a resource is not found."""
     # 404 Resource Not Found
-    pass
+
+    def __init__(self, response=None, message=None):
+      if message is None:
+        message = '%s: %s' % (response.msg, response.url)
+      ClientError.__init__(self, response=response, message=message)
 
 
 class BadRequest(ClientError):
@@ -383,4 +394,3 @@ class Connection(object):
             raise ServerError(err)
         else:
             raise ConnectionError(err)
-
