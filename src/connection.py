@@ -155,7 +155,7 @@ class Response(object):
         return False
 
     def __repr__(self):
-        return 'Response(code=%d, body="%s", headers=%s, msg="%s")' % (
+        return 'Response(code=%s, body="%s", headers=%s, msg="%s")' % (
             self.code, self.body, self.headers, self.msg)
 
     def __getitem__(self, key):
