@@ -14,9 +14,10 @@ from pyactiveresource import formats
 class Error(Exception):
     """A general error derived from Exception."""
 
-    def __init__(self, msg, url):
-      Exception.__init__(self, msg)
-      self.url = url
+    def __init__(self, msg, url=None, code=None):
+        Exception.__init__(self, msg)
+        self.url = url
+        self.code = code
 
 
 class ServerError(Error):
@@ -24,21 +25,23 @@ class ServerError(Error):
     # HTTP error code 5xx (500..599)
 
     def __init__(self, response):
-      Error.__init__(self, response.msg, response.url)
+        Error.__init__(self, response.msg, response.url, response.code)
 
 
 class ConnectionError(Error):
     """An error caused by network connection."""
+
     def __init__(self, response=None, message=None):
         if not response:
-          self.response = Response(None, '')
-          url = None
+            self.response = Response(None, '')
+            url = None
         else:
-          self.response = Response.from_httpresponse(response)
-          url = response.url
+            self.response = Response.from_httpresponse(response)
+            url = response.url
         if not message:
             message = str(self.response)
-        Error.__init__(self, message, url)
+
+        Error.__init__(self, message, url, self.response.code)
 
 
 class Redirection(ConnectionError):
@@ -69,9 +72,10 @@ class ResourceNotFound(ClientError):
     # 404 Resource Not Found
 
     def __init__(self, response=None, message=None):
-      if message is None:
-        message = '%s: %s' % (response.msg, response.url)
-      ClientError.__init__(self, response=response, message=message)
+        if message is None:
+            message = '%s: %s' % (response.msg, response.url)
+
+        ClientError.__init__(self, response=response, message=message)
 
 
 class BadRequest(ClientError):
