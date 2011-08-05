@@ -277,6 +277,10 @@ class UtilTest(unittest.TestCase):
         xml = util.to_xml({'key_name': 'value'}, dasherize=False)
         self.assert_('<key_name>value</key_name>' in xml)
 
+    def test_to_xml_should_honor_dasherize_option_for_children(self):
+        xml = util.to_xml([{'key_name': 'value'}], dasherize=False)
+        self.assert_('<key_name>value</key_name>' in xml)
+
 
 if __name__ == '__main__':
     unittest.main()

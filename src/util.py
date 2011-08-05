@@ -263,14 +263,16 @@ def to_xml(obj, root='object', pretty=False, header=True, dasherize=True):
         root_element.set('type', 'array')
         for i in obj:
             element = ET.fromstring(
-                    to_xml(i, root=singularize(root), header=False))
+                    to_xml(i, root=singularize(root), header=False,
+                           pretty=pretty, dasherize=dasherize))
             root_element.append(element)
     else:
         for key, value in obj.iteritems():
             key = dasherize and key.replace('_', '-') or key
             if isinstance(value, dict) or isinstance(value, list):
                 element = ET.fromstring(
-                    to_xml(value, root=key, header=False))
+                    to_xml(value, root=key, header=False,
+                           pretty=pretty, dasherize=dasherize))
                 root_element.append(element)
             else:
                 element = ET.SubElement(root_element, key)
