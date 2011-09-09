@@ -128,7 +128,7 @@ def _urllib_has_timeout():
   """Determines if our version of urllib2.urlopen has a timeout argument."""
   # NOTE: This is a terrible hack, but there's no other indication that this
   #     argument was added to the function.
-  version = sys.version_info()
+  version = sys.version_info
   return version[0] >= 2 and version[1] >= 6
 
 
@@ -275,7 +275,7 @@ class Connection(object):
           request.add_header('Content-Type', self.format.mime_type)
           request.add_header('Content-Length', '0')
 
-        if self.timeout and _urllib_has_timeout():
+        if self.timeout and not _urllib_has_timeout():
             # This is lame, and urllib2 sucks for not giving a good way to do this
             old_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(self.timeout)
@@ -290,7 +290,7 @@ class Connection(object):
             self.log.debug('Response(code=%d, headers=%s, msg="%s")',
                            response.code, response.headers, response.msg)
         finally:
-            if self.timeout and _urllib_has_timeout():
+            if self.timeout and not _urllib_has_timeout():
                 socket.setdefaulttimeout(old_timeout)
 
         self.log.info('--> %d %s %db', response.code, response.msg,
