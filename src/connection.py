@@ -6,6 +6,7 @@
 import base64
 import logging
 import socket
+import sys
 import urllib2
 import urlparse
 from pyactiveresource import formats
@@ -121,6 +122,14 @@ class Request(urllib2.Request):
     def set_method(self, method):
         """Set the HTTP method."""
         self._method = method
+
+
+def _urllib_has_timeout():
+  """Determines if our version of urllib2.urlopen has a timeout argument."""
+  # NOTE: This is a terrible hack, but there's no other indication that this
+  #     argument was added to the function.
+  version = sys.version_info()
+  return version[0] >= 2 and version[1] >= 6
 
 
 class Response(object):
@@ -265,7 +274,8 @@ class Connection(object):
           # Some web servers need a content length on all POST/PUT operations
           request.add_header('Content-Type', self.format.mime_type)
           request.add_header('Content-Length', '0')
-        if self.timeout:
+
+        if self.timeout and _urllib_has_timeout():
             # This is lame, and urllib2 sucks for not giving a good way to do this
             old_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(self.timeout)
@@ -280,7 +290,7 @@ class Connection(object):
             self.log.debug('Response(code=%d, headers=%s, msg="%s")',
                            response.code, response.headers, response.msg)
         finally:
-            if self.timeout:
+            if self.timeout and _urllib_has_timeout():
                 socket.setdefaulttimeout(old_timeout)
 
         self.log.info('--> %d %s %db', response.code, response.msg,
@@ -298,7 +308,10 @@ class Connection(object):
             urllib2.HTTPError on server errors.
             urllib2.URLError on IO errors.
         """
-        return urllib2.urlopen(request)
+        if _urllib_has_timeout():
+          return urllib2.urlopen(request, timeout=self.timeout)
+        else:
+          return urllib2.urlopen(request)
 
     def get(self, path, headers=None):
         """Perform an HTTP get request.
