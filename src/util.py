@@ -43,8 +43,6 @@ except ImportError:
     except ImportError:
         try:
             from xml.etree import ElementTree as ET
-        except ImportError:
-            from google3.third_party.python.elementtree import ElementTree as ET
 
 XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'
 
