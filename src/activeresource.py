@@ -160,7 +160,7 @@ class ResourceMeta(type):
             new_attrs: The class attribute dictionary.
         """
         if '_singular' not in new_attrs or not new_attrs['_singular']:
-          new_attrs['_singular'] = util.underscore(name)
+            new_attrs['_singular'] = util.underscore(name)
 
         if '_plural' not in new_attrs or not new_attrs['_plural']:
             new_attrs['_plural'] = util.pluralize(new_attrs['_singular'])
