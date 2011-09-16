@@ -202,8 +202,8 @@ class Connection(object):
         """
 
         self.site, self.user, self.password = self._parse_site(site)
-        self.user = user or ''
-        self.password = password or ''
+        self.user = user or self.user or ''
+        self.password = password or self.password or ''
 
         if self.user or self.password:
             self.auth = base64.b64encode('%s:%s' % (self.user, self.password))
@@ -276,7 +276,7 @@ class Connection(object):
           request.add_header('Content-Length', '0')
 
         if self.timeout and not _urllib_has_timeout():
-            # This is lame, and urllib2 sucks for not giving a good way to do this
+            # Hack around lack of timeout option in python < 2.6
             old_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(self.timeout)
         try:
