@@ -280,6 +280,7 @@ class Connection(object):
             old_timeout = socket.getdefaulttimeout()
             socket.setdefaulttimeout(self.timeout)
         try:
+            http_response = None
             try:
                 http_response = self._handle_error(self._urlopen(request))
             except urllib2.HTTPError, err:
@@ -290,6 +291,8 @@ class Connection(object):
             self.log.debug('Response(code=%d, headers=%s, msg="%s")',
                            response.code, response.headers, response.msg)
         finally:
+            if http_response:
+                http_response.close()
             if self.timeout and not _urllib_has_timeout():
                 socket.setdefaulttimeout(old_timeout)
 

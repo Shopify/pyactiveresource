@@ -44,7 +44,7 @@ class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
     @classmethod
     def set_response(cls, response):
         """Set a static response to be returned for all requests.
-        
+
         Args:
             response: A FakeResponse object to be returned.
         """
@@ -55,7 +55,7 @@ class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
     def respond_to(cls, method, path,
                    request_headers, body, code=200, response_headers=None):
         """Build a response object to be used for a specific request.
-        
+
         Args:
             method: The http method (e.g. 'get', 'put' etc.)
             path: The path being requested (e.g. '/collection/id.xml')
@@ -73,10 +73,10 @@ class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
 
     def do_open(self, http_class, request):
         """Return the response object for the given request.
-        
+
         Overrides the HTTPHandler method of the same name to return a
         FakeResponse instead of creating any network connections.
-        
+
         Args:
             http_class: The http protocol being used.
             request: A urllib2.Request object.
@@ -90,7 +90,7 @@ class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
                    capitalize_keys(request.headers))
             if str(key) in self._response_map:
                 (code, body, response_headers) = self._response_map[str(key)]
-                return FakeResponse(code, body, response_headers) 
+                return FakeResponse(code, body, response_headers)
             else:
                 raise Error('Unknown request %s %s'
                             '\nrequest:%s\nresponse_map:%s' % (
@@ -103,8 +103,8 @@ class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
 
 
 class FakeResponse(object):
-    '''A fake HTTPResponse object for testing.'''
-    
+    """A fake HTTPResponse object for testing."""
+
     def __init__(self, code, body, headers=None):
         self.code = code
         self.msg = str(code)
@@ -113,11 +113,15 @@ class FakeResponse(object):
         self.headers = headers
         self.info = lambda: self.headers
         self.body_file = StringIO(body)
-    
+
     def read(self):
         """Read the entire response body."""
         return self.body_file.read()
-    
+
     def readline(self):
         """Read a single line from the response body."""
         return self.body_file.readline()
+
+    def close(self):
+        """Close the connection."""
+        pass
