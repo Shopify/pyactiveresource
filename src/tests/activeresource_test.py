@@ -152,28 +152,28 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_should_handle_array_query_args(self):
-      query = urllib.urlencode({'vars[]': ['a', 'b', 'c']}, True)
-      self.http.respond_to(
-        'GET', '/people.xml?%s' % query, {},
-        util.to_xml([self.arnold], root='people'))
-      arnold = self.person.find_first(vars=['a', 'b', 'c'])
-      self.assertEqual(self.arnold, arnold.attributes)
+        query = urllib.urlencode({'vars[]': ['a', 'b', 'c']}, True)
+        self.http.respond_to(
+            'GET', '/people.xml?%s' % query, {},
+            util.to_xml([self.arnold], root='people'))
+        arnold = self.person.find_first(vars=['a', 'b', 'c'])
+        self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_should_handle_dictionary_query_args(self):
-      query = urllib.urlencode({'vars[key]': 'val'}, True)
-      self.http.respond_to(
-        'GET', '/people.xml?%s' % query, {},
-        util.to_xml([self.arnold], root='people'))
-      arnold = self.person.find_first(vars={'key': 'val'})
-      self.assertEqual(self.arnold, arnold.attributes)
+        query = urllib.urlencode({'vars[key]': 'val'}, True)
+        self.http.respond_to(
+            'GET', '/people.xml?%s' % query, {},
+            util.to_xml([self.arnold], root='people'))
+        arnold = self.person.find_first(vars={'key': 'val'})
+        self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_should_handle_dictionary_query_args_with_array_value(self):
-      query = urllib.urlencode({'vars[key][]': ['val1', 'val2']}, True)
-      self.http.respond_to(
-        'GET', '/people.xml?%s' % query, {},
-        util.to_xml([self.arnold], root='people'))
-      arnold = self.person.find_first(vars={'key': ['val1', 'val2']})
-      self.assertEqual(self.arnold, arnold.attributes)
+        query = urllib.urlencode({'vars[key][]': ['val1', 'val2']}, True)
+        self.http.respond_to(
+            'GET', '/people.xml?%s' % query, {},
+            util.to_xml([self.arnold], root='people'))
+        arnold = self.person.find_first(vars={'key': ['val1', 'val2']})
+        self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_with_prefix_options(self):
         # Paths for prefix_options related requests
@@ -194,13 +194,22 @@ class ActiveResourceTest(unittest.TestCase):
         nobody = self.person.find(store_id=1, name='Ralph')
         self.assertEqual([], nobody)
 
+    def test_find_class_for_should_create_classes(self):
+        found = activeresource.ActiveResource._find_class_for('NotARealClass')
+        self.assert_(issubclass(found, activeresource.ActiveResource))
+
+    def test_find_class_for_should_not_create_classes(self):
+        found = activeresource.ActiveResource._find_class_for(
+            'NotARealClass', create_missing=False)
+        self.assert_(found is None)
+
     def test_set_prefix_source(self):
-      self.http.respond_to(
-          'GET', '/stores/1/people.xml?name=Ralph', {},
-          util.to_xml([], root='people'))
-      self.person.prefix_source = '/stores/${store_id}/'
-      nobody = self.person.find(store_id=1, name='Ralph')
-      self.assertEqual([], nobody)
+        self.http.respond_to(
+            'GET', '/stores/1/people.xml?name=Ralph', {},
+            util.to_xml([], root='people'))
+        self.person.prefix_source = '/stores/${store_id}/'
+        nobody = self.person.find(store_id=1, name='Ralph')
+        self.assertEqual([], nobody)
 
     def test_save(self):
         # Return an object with id for a post(save) request.
@@ -367,12 +376,12 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertFalse(Actor.connection.password)
 
     def test_format_variable_can_by_reset(self):
-      class Actor(activeresource.ActiveResource): pass
-      Actor.site = 'http://cinema'
-      Actor.format = None
-      self.assert_(Actor.connection.format is None)
-      Actor.format = object()
-      self.assertEqual(Actor.format, Actor.connection.format)
+        class Actor(activeresource.ActiveResource): pass
+        Actor.site = 'http://cinema'
+        Actor.format = None
+        self.assert_(Actor.connection.format is None)
+        Actor.format = object()
+        self.assertEqual(Actor.format, Actor.connection.format)
 
     def test_timeout_variable_can_be_reset(self):
         class Actor(activeresource.ActiveResource): pass

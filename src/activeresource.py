@@ -914,7 +914,8 @@ class ActiveResource(object):
         return cls._find_class_for(util.singularize(collection_name))
 
     @classmethod
-    def _find_class_for(cls, element_name=None, class_name=None):
+    def _find_class_for(cls, element_name=None,
+                        class_name=None, create_missing=True):
         """Look in the parent modules for classes matching the element name.
 
         One or both of element/class name must be specified.
@@ -922,6 +923,8 @@ class ActiveResource(object):
         Args:
             element_name: The name of the element type.
             class_name: The class name of the element type.
+            create_missing: Whether classes should be auto-created if no
+                existing match is found.
         Returns:
             A Resource class.
         """
@@ -956,8 +959,9 @@ class ActiveResource(object):
                     continue
 
         # If we made it this far, no such class was found
-        return new.classobj(class_name, (cls,),
-                            {'__module__': cls.__module__})
+        if create_missing:
+            return new.classobj(class_name, (cls,),
+                                {'__module__': cls.__module__})
 
     # methods corresponding to Ruby's custom_methods
     def _custom_method_element_url(self, method_name, options):
