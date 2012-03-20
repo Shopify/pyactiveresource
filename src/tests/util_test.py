@@ -273,6 +273,10 @@ class UtilTest(unittest.TestCase):
         xml = util.to_xml({'data': u'\xe9'})
         self.assert_('<data>&#233;</data>' in xml)
 
+    def test_to_xml_should_allow_utf8_encoded_strings(self):
+        xml = util.to_xml({'data': u'\xe9'.encode('utf-8')})
+        self.assert_('<data>&#233;</data>' in xml)
+
     def test_to_xml_should_allow_disabling_dasherization(self):
         xml = util.to_xml({'key_name': 'value'}, dasherize=False)
         self.assert_('<key_name>value</key_name>' in xml)

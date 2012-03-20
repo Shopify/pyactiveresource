@@ -115,7 +115,9 @@ SERIALIZERS = [
     {'type': int,
      'method': lambda value: ('integer', unicode(value))},
     {'type': long,
-     'method': lambda value: ('integer', unicode(value))}]
+     'method': lambda value: ('integer', unicode(value))},
+    {'type': str,
+     'method': lambda value: (None, unicode(value, 'utf-8'))}]
 
 DEFAULT_SERIALIZER = {
     'type': object,
