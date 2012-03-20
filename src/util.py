@@ -216,10 +216,10 @@ def to_query(query_params):
                     dict_options['%s[%s]' % (key, dk)] = dv
                 annotated.update(annotate_params(dict_options))
                 continue
-            elif not isinstance(value, basestring):
-                value = str(value).encode('utf-8')
-            else:
+            elif isinstance(value, unicode):
                 value = value.encode('utf-8')
+            else:
+                value = str(value)
             annotated[key] = value
         return annotated
     annotated = annotate_params(query_params)

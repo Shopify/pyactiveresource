@@ -281,6 +281,22 @@ class UtilTest(unittest.TestCase):
         xml = util.to_xml([{'key_name': 'value'}], dasherize=False)
         self.assert_('<key_name>value</key_name>' in xml)
 
+    def test_to_query_with_utf8_encoded_strings(self):
+        query = util.to_query({'var': '\xC3\xA5\xC3\xB1\xC3\xBC\xC3\xA8'})
+        self.assertEqual('var=%C3%A5%C3%B1%C3%BC%C3%A8', query)
+
+    def test_to_query_with_unicode_strings(self):
+        query = util.to_query({'var': u'\xe5\xf1\xfc\xe8'})
+        self.assertEqual('var=%C3%A5%C3%B1%C3%BC%C3%A8', query)
+
+    def test_to_query_with_arrays(self):
+        query = util.to_query({'var': ['a', 2, 3.0]})
+        self.assertEqual('var%5B%5D=a&var%5B%5D=2&var%5B%5D=3.0', query)
+
+    def test_to_query_with_dictionaries(self):
+        query = util.to_query({'var': {'a': 1, 'b':{'c': 2}}})
+        self.assertEqual(set(['var%5Ba%5D=1', 'var%5Bb%5D%5Bc%5D=2']), set(query.split('&')))
+
 
 if __name__ == '__main__':
     unittest.main()
