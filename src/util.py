@@ -12,6 +12,7 @@ import element_containers
 import re
 import time
 import datetime
+import urllib
 try:
     import yaml
 except ImportError:
@@ -194,6 +195,35 @@ def underscore(word):
     """
     return re.sub(r'\B((?<=[a-z])[A-Z]|[A-Z](?=[a-z]))',
                   r'_\1', word).lower()
+
+
+def to_query(query_params):
+    """Convert a dictionary to url query parameters.
+
+    Args:
+        query_params: A dictionary of arguments.
+    Returns:
+        A string of query parameters.
+    """
+    def annotate_params(params):
+        annotated = {}
+        for key, value in params.iteritems():
+            if isinstance(value, list):
+                key = '%s[]' % key
+            elif isinstance(value, dict):
+                dict_options = {}
+                for dk, dv in value.iteritems():
+                    dict_options['%s[%s]' % (key, dk)] = dv
+                annotated.update(annotate_params(dict_options))
+                continue
+            elif not isinstance(value, basestring):
+                value = str(value).encode('utf-8')
+            else:
+                value = value.encode('utf-8')
+            annotated[key] = value
+        return annotated
+    annotated = annotate_params(query_params)
+    return urllib.urlencode(annotated, True)
 
 
 def xml_pretty_format(element, level=0):

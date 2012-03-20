@@ -418,19 +418,7 @@ class ActiveResource(object):
         #TODO(mrroach): figure out prefix_options
         prefix_options = {}
         query_options = {}
-        for key, value in options.items():
-            if isinstance(value, list):
-                key = '%s[]' % key
-            elif isinstance(value, dict):
-                dict_options = {}
-                for dk, dv in value.items():
-                    dict_options['%s[%s]' % (key, dk)] = dv
-                query_options.update(cls._split_options(dict_options)[1])
-                continue
-            elif not isinstance(value, basestring):
-                value = str(value).encode('utf-8')
-            else:
-                value = value.encode('utf-8')
+        for key, value in options.iteritems():
             if key in cls._prefix_parameters():
                 prefix_options[key] = value
             else:
@@ -533,7 +521,7 @@ class ActiveResource(object):
             A string containing the encoded query.
         """
         if query_options:
-            return '?' + urllib.urlencode(query_options, True)
+            return '?' + util.to_query(query_options)
         else:
             return ''
 
