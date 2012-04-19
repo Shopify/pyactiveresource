@@ -757,6 +757,7 @@ class ActiveResource(object):
             connection.Error: On any communications problems.
         """
         try:
+            self.errors.clear()
             if self.id:
                 response = self.klass.connection.put(
                         self._element_path(self.id, self._prefix_options),

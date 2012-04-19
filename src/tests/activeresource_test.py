@@ -227,6 +227,15 @@ class ActiveResourceTest(unittest.TestCase):
         store.manager_id = 3
         store.save()
 
+    def test_save_should_clear_errors(self):
+      self.http.respond_to(
+          'POST', '/stores.xml', self.xml_headers,
+          util.to_xml(self.general_store))
+      store = self.store(self.store_new)
+      store.errors.add_to_base('bad things!')
+      store.save()
+      self.assertEqual(0, store.errors.size)
+
     def test_class_get(self):
         self.http.respond_to('GET', '/people/retrieve.xml?name=Matz',
                              {}, self.matz_array)
