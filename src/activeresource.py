@@ -286,6 +286,15 @@ class ResourceMeta(type):
         """Return the rendered prefix for this object."""
         return cls._prefix(options)
 
+    def get_primary_key(cls):
+        return cls._primary_key
+
+    def set_primary_key(cls, value):
+        cls._primary_key = value
+
+    primary_key = property(get_primary_key, set_primary_key, None,
+                           'Name of attribute that uniquely identies the resource')
+
 
 class ActiveResource(object):
     """Represents an activeresource object."""
@@ -298,6 +307,7 @@ class ActiveResource(object):
     _site = None
     _timeout = None
     _user = None
+    _primary_key = "id"
 
     def __init__(self, attributes=None, prefix_options=None):
         """Initialize a new ActiveResource object.
@@ -770,7 +780,7 @@ class ActiveResource(object):
                         data=self.to_xml())
                 new_id = self._id_from_response(response)
                 if new_id:
-                    self.attributes['id'] = new_id
+                    self.id = new_id
         except connection.ResourceInvalid, err:
             self.errors.from_xml(err.response.body)
             return False
@@ -821,6 +831,14 @@ class ActiveResource(object):
                 self._element_path(self.id, self._prefix_options),
                 self.klass.headers)
 
+    def get_id(self):
+        return self.attributes.get(self.klass.primary_key)
+
+    def set_id(self, value):
+        self.attributes[self.klass.primary_key] = value
+
+    id = property(get_id, set_id, None, 'Value stored in the primary key')
+
     def __getattr__(self, name):
         """Retrieve the requested attribute if it exists.
 
@@ -832,9 +850,6 @@ class ActiveResource(object):
             AttributeError: if no such attribute exists.
         """
         if 'attributes' in self.__dict__:
-            if name == 'id':
-                # id should always be getattrable
-                return self.attributes.get('id')
             if name in self.attributes:
                 return self.attributes[name]
         raise AttributeError(name)
@@ -849,7 +864,7 @@ class ActiveResource(object):
             None
         """
         if '_initialized' in self.__dict__:
-            if name in self.__dict__ or name in self.__class__.__dict__:
+            if name in self.__dict__ or getattr(self.__class__, name, None):
                 # Update a normal attribute
                 object.__setattr__(self, name, value)
             else:

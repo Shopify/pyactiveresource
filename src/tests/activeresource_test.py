@@ -463,6 +463,19 @@ class ActiveResourceTest(unittest.TestCase):
         self.person.timeout = 10
         self.assert_(self.person.connection is Actor.connection)
 
+    def test_custom_primary_key(self):
+        class User(self.person):
+            _primary_key = 'username'
+
+        self.assertEqual('username', User.primary_key)
+        user = User()
+        self.assertEqual(None, user.id)
+        user.id = 'bob'
+        self.assertEqual('bob', user.id)
+        self.assertEqual('bob', user.username)
+        self.assertEqual('bob', user.attributes['username'])
+        self.assert_('id' not in user.attributes)
+
     def test_repeated_attribute_modification_updates_attributes_dict(self):
         res = activeresource.ActiveResource()
         res.name = 'first'
