@@ -882,6 +882,9 @@ class ActiveResource(object):
         else:
             return cmp(self.id, other)
 
+    def __hash__(self):
+        return hash(tuple(self.attributes.items()))
+
     def _update(self, attributes):
         """Update the object with the given attributes.
 

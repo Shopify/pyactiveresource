@@ -508,6 +508,18 @@ class ActiveResourceTest(unittest.TestCase):
         xml = res.to_xml(dasherize=False)
         self.assert_('<attr_name>value</attr_name>' in xml)
 
+    def test_same_attributes_should_share_the_same_hash(self):
+        a = self.person({'name': 'foo', 'id': 1})
+        b = self.person({'name': 'foo', 'id': 1})
+        self.assertEqual(hash(a), hash(b))
+        self.assertEqual(a, b)
+
+    def test_different_attributes_should_not_share_the_same_hash(self):
+        a = self.person({'name': 'foo', 'id': 1})
+        b = self.person({'name': 'bar', 'id': 2})
+        self.assertNotEqual(hash(a), hash(b))
+        self.assertNotEqual(a, b)
+
 
 if __name__ == '__main__':
     unittest.main()
