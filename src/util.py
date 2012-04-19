@@ -405,7 +405,7 @@ def xml_to_dict(xmlobj, saveroot=True):
                 underscore(element.get('type', '')), element.items())
         else:
             attributes = element_containers.ElementDict(singularize(
-                element.tag.replace('-', '_')))
+                element.tag.replace('-', '_')), element.items())
         for child in element.getchildren():
             attribute = xml_to_dict(child, saveroot)
             child_tag = child.tag.replace('-', '_')

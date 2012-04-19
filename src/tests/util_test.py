@@ -285,6 +285,20 @@ class UtilTest(unittest.TestCase):
         xml = util.to_xml([{'key_name': 'value'}], dasherize=False)
         self.assert_('<key_name>value</key_name>' in xml)
 
+    def test_to_xml_should_consider_attributes_on_element_with_children(self):
+        custom_field_xml = '''
+            <custom_field name="custom1" id="1">
+              <value>cust1</value>
+            </custom_field>'''
+        expected = {
+                'custom_field': {
+                    'name': 'custom1',
+                    'id': '1',
+                    'value': 'cust1'}
+                }
+        result = util.xml_to_dict(custom_field_xml, saveroot=True)
+        self.assertEqual(expected, result)
+
     def test_to_query_with_utf8_encoded_strings(self):
         query = util.to_query({'var': '\xC3\xA5\xC3\xB1\xC3\xBC\xC3\xA8'})
         self.assertEqual('var=%C3%A5%C3%B1%C3%BC%C3%A8', query)
