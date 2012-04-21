@@ -725,6 +725,9 @@ class ActiveResource(object):
                 values[key] = value
         return values
 
+    def encode(self, **options):
+        return getattr(self, "to_" + self.klass.format.extension)(**options)
+
     def to_xml(self, root=None, header=True, pretty=False, dasherize=True):
         """Convert the object to an xml string.
 
@@ -772,12 +775,12 @@ class ActiveResource(object):
                 response = self.klass.connection.put(
                         self._element_path(self.id, self._prefix_options),
                         self.klass.headers,
-                        data=self.to_xml())
+                        data=self.encode())
             else:
                 response = self.klass.connection.post(
                         self._collection_path(self._prefix_options),
                         self.klass.headers,
-                        data=self.to_xml())
+                        data=self.encode())
                 new_id = self._id_from_response(response)
                 if new_id:
                     self.id = new_id
@@ -1038,7 +1041,7 @@ class ActiveResource(object):
             url = self._custom_method_element_url(method_name, kwargs)
         else:
             if not body:
-                body = self.to_xml()
+                body = self.encode()
             url = self._custom_method_new_element_url(method_name, kwargs)
         return self.klass.connection.post(url, self.klass.headers, body)
 
