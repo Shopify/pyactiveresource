@@ -11,6 +11,7 @@ import urllib2
 from StringIO import StringIO
 from pyactiveresource import connection
 from pyactiveresource import util
+from pyactiveresource import formats
 from pyactiveresource.tests import http_fake
 
 
@@ -114,6 +115,14 @@ class ConnectionTest(unittest.TestCase):
         self.http.respond_to('HEAD', 'http://localhost/people/1.xml', {}, '')
         self.assertFalse(self.connection.head('/people/1.xml').body)
 
+    def test_get_with_json_format(self):
+        person = util.to_json({'id': 1, 'name': 'Matz'}, root='person')
+        self.http.respond_to(
+            'GET', 'http://localhost/people/1.json', {}, person)
+        self.connection.format = formats.JSONFormat
+        response = self.connection.get('/people/1.json')
+        self.assertEqual(response['name'], 'Matz')
+
     def test_get_with_header(self):
         self.http.respond_to(
             'GET', 'http://localhost/people/2.xml', self.header, self.david)
@@ -144,7 +153,7 @@ class ConnectionTest(unittest.TestCase):
             '', 200, {'Location': '/people/5.xml'})
         response = self.connection.post('/people.xml')
         self.assertEqual('/people/5.xml', response['Location'])
-  
+
     def test_post_with_header(self):
         header = self.header
         header.update(self.zero_length_content_headers)
@@ -153,7 +162,17 @@ class ConnectionTest(unittest.TestCase):
             '', 201, {'Location': '/people/6.xml'})
         response = self.connection.post('/members.xml', self.header)
         self.assertEqual('/people/6.xml', response['Location'])
-  
+
+    def test_post_with_json_format(self):
+        content_headers = {'Content-Length': '0',
+                           'Content-Type': 'application/json'}
+        self.http.respond_to(
+            'POST', '/people.json', content_headers,
+            '', 200, {'Location': '/people/5.json'})
+        self.connection.format = formats.JSONFormat
+        response = self.connection.post('/people.json')
+        self.assertEqual('/people/5.json', response['Location'])
+
     def test_put(self):
         self.http.respond_to('PUT', '/people/1.xml',
                              self.zero_length_content_headers, '', 204)

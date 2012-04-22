@@ -8,6 +8,10 @@ __author__ = 'Mark Roach (mrroach@google.com)'
 import logging
 from pyactiveresource import util
 
+def remove_root(data):
+    if isinstance(data, dict) and len(data) == 1:
+        return data.values()[0]
+    return data
 
 class Error(Exception):
     """Base exception type for this module."""
@@ -32,6 +36,28 @@ class XMLFormat(Base):
             data = util.xml_to_dict(resource_string, saveroot=False)
         except util.Error, err:
             raise Error(err)
-        if isinstance(data, dict) and len(data) == 1:
-            data = data.values()[0]
-        return data
+        return remove_root(data)
+
+class JSONFormat(Base):
+    """Encode and Decode JSON formatted ActiveResource objects."""
+
+    extension = 'json'
+    mime_type = 'application/json'
+
+    @staticmethod
+    def decode(resource_string):
+        """Convert a resource string to a dictionary."""
+        log = logging.getLogger('pyactiveresource.format')
+        log.debug('decoding resource: %s', resource_string)
+        try:
+            data = util.json_to_dict(resource_string)
+        except ValueError, err:
+            raise Error(err)
+        return remove_root(data)
+
+    @staticmethod
+    def encode(data):
+        """Convert a dictionary to a resource string."""
+        log = logging.getLogger('pyactiveresource.format')
+        log.debug('encoding resource: %r', data)
+        return util.to_json(data)

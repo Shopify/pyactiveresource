@@ -19,6 +19,14 @@ except ImportError:
     yaml = None
 
 try:
+    import simplejson as json
+except ImportError:
+    try:
+        import json
+    except ImportError:
+        json = None
+
+try:
     from dateutil.parser import parse as date_parse
 except ImportError:
     try:
@@ -271,6 +279,31 @@ def serialize(value, element):
             if element_type:
                 element.set('type', element_type)
             break
+
+
+def to_json(obj, root='object'):
+    """Convert a dictionary or list to an JSON string.
+
+    Args:
+        obj: The object to serialize.
+
+    Returns:
+        A json string.
+    """
+    if root:
+        obj = { root: obj }
+    return json.dumps(obj)
+
+
+def json_to_dict(jsonstr):
+    """Parse the json into a dictionary of attributes.
+
+    Args:
+        jsonstr: A JSON formatted string.
+    Returns:
+        The deserialized object.
+    """
+    return json.loads(jsonstr)
 
 
 def to_xml(obj, root='object', pretty=False, header=True, dasherize=True):
