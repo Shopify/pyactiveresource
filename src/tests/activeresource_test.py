@@ -275,6 +275,23 @@ class ActiveResourceTest(unittest.TestCase):
       store.save()
       self.assertEqual(0, store.errors.size)
 
+    def test_save_with_errors(self):
+        self.http.respond_to('POST', '/stores.xml', self.xml_headers,
+                '''<errors>
+                    <error>Name already exists</error>
+                </errors>''', 422)
+        store = self.store(self.store_new)
+        self.assertEqual(False, store.save())
+        self.assertEqual({ 'name': ['already exists'] }, store.errors.errors)
+
+    def test_save_with_json_errors(self):
+        self.http.respond_to('POST', '/stores.json', self.json_headers,
+                '''{"errors":{"name":["already exists"]}}''', 422)
+        self.store.format = formats.JSONFormat
+        store = self.store(self.store_new)
+        self.assertEqual(False, store.save())
+        self.assertEqual({ 'name': ['already exists'] }, store.errors.errors)
+
     def test_class_get(self):
         self.http.respond_to('GET', '/people/retrieve.xml?name=Matz',
                              {}, self.matz_array)

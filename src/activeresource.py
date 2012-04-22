@@ -75,6 +75,25 @@ class Errors(object):
         """
         self.errors = {}
 
+    def from_array(self, messages):
+        attribute_keys = self.base.attributes.keys()
+        for message in messages:
+            attr_name = message.split()[0]
+            key = util.underscore(attr_name)
+            if key in attribute_keys:
+                self.add(key, message[len(attr_name)+1:])
+            else:
+                self.add_to_base(message)
+
+    def from_hash(self, messages):
+        attribute_keys = self.base.attributes.keys()
+        for key, errors in messages.iteritems():
+            for message in errors:
+                if key in attribute_keys:
+                    self.add(key, message)
+                else:
+                    self.add_to_base(message)
+
     def from_xml(self, xml_string):
         """Grab errors from an XML response.
 
@@ -83,21 +102,38 @@ class Errors(object):
         Returns:
             None
         """
-        attribute_keys = self.base.attributes.keys()
         try:
-            messages = util.xml_to_dict(
-                    xml_string)['errors']['error']
+            messages = util.xml_to_dict(xml_string)['errors']['error']
             if not isinstance(messages, list):
                 messages = [messages]
         except util.Error:
             messages = []
-        for message in messages:
-            attr_name = message.split()[0]
-            key = util.underscore(attr_name)
-            if key in attribute_keys:
-                self.add(key, message[len(attr_name)+1:])
+        self.from_array(messages)
+
+    def from_json(self, json_string):
+        """Grab errors from a JSON response.
+
+        Args:
+            json_string: An json errors object (e.g. "{ 'errors': {} }")
+        Returns:
+            None
+        """
+        try:
+            decoded = util.json_to_dict(json_string)
+        except ValueError:
+            decoded = {}
+        if not decoded:
+            decoded = {}
+        if isinstance(decoded, dict) and (decoded.has_key('errors') or len(decoded) == 0):
+            errors = decoded.get('errors', {})
+            if isinstance(errors, list):
+                # Deprecated in ActiveResource
+                self.from_array(errors)
             else:
-                self.add_to_base(message)
+                self.from_hash(errors)
+        else:
+            # Deprecated in ActiveResource
+            self.from_hash(decoded)
 
     def on(self, attribute):
         """Return the errors for the given attribute.
@@ -791,7 +827,10 @@ class ActiveResource(object):
                 if new_id:
                     self.id = new_id
         except connection.ResourceInvalid, err:
-            self.errors.from_xml(err.response.body)
+            if self.klass.format == formats.XMLFormat:
+                self.errors.from_xml(err.response.body)
+            elif self.klass.format == formats.JSONFormat:
+                self.errors.from_json(err.response.body)
             return False
         try:
             attributes = self.klass.format.decode(response.body)
