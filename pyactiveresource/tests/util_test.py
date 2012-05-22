@@ -14,7 +14,7 @@ from pprint import pprint
 
 def diff_dicts(d1, d2):
     """Print the differences between two dicts. Useful for troubleshooting."""
-    pprint([(k,v) for k,v in d2.items()
+    pprint([(k,v) for k,v in d2.iteritems()
             if v != d1[k]])
 
 

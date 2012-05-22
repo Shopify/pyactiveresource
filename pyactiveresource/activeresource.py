@@ -156,7 +156,7 @@ class Errors(object):
             An array of error strings.
         """
         messages = []
-        for key, errors in self.errors.items():
+        for key, errors in self.errors.iteritems():
             for error in errors:
                 if key == 'base':
                     messages.append(error)
@@ -934,7 +934,7 @@ class ActiveResource(object):
             return cmp(self.id, other)
 
     def __hash__(self):
-        return hash(tuple(self.attributes.items()))
+        return hash(tuple(self.attributes.iteritems()))
 
     def _update(self, attributes):
         """Update the object with the given attributes.
@@ -946,7 +946,7 @@ class ActiveResource(object):
         """
         if not isinstance(attributes, dict):
             return
-        for key, value in attributes.items():
+        for key, value in attributes.iteritems():
             if isinstance(value, dict):
                 klass = self._find_class_for(key)
                 attr = klass(value)
@@ -1001,7 +1001,7 @@ class ActiveResource(object):
             class_name = util.camelize(element_name)
 
         module_path = cls.__module__.split('.')
-        for depth in range(len(module_path), 0, -1):
+        for depth in xrange(len(module_path), 0, -1):
             try:
                 __import__('.'.join(module_path[:depth]))
                 module = sys.modules['.'.join(module_path[:depth])]
