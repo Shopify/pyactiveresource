@@ -368,11 +368,7 @@ def xml_to_dict(xmlobj, saveroot=True):
         element_list_type = element.tag.replace('-', '_')
         return_list = element_containers.ElementList(element_list_type)
         for child in element.getchildren():
-            child_element = xml_to_dict(child, saveroot)
-            if saveroot and isinstance(child_element, dict):
-                  return_list.append(child_element.values()[0])
-            else:
-                  return_list.append(child_element)
+            return_list.append(xml_to_dict(child, saveroot=False))
         if saveroot:
             return element_containers.ElementDict(element_list_type,
                                                   {element_list_type:
@@ -436,14 +432,8 @@ def xml_to_dict(xmlobj, saveroot=True):
             attributes = element_containers.ElementDict(singularize(
                 element.tag.replace('-', '_')), element.items())
         for child in element.getchildren():
-            attribute = xml_to_dict(child, saveroot)
+            attribute = xml_to_dict(child, saveroot=False)
             child_tag = child.tag.replace('-', '_')
-            if saveroot:
-                # If this is a nested hash, it will come back as
-                # {child_tag: {key: value}}, we only want the inner hash
-                if isinstance(attribute, dict):
-                    if len(attribute) == 1 and child_tag in attribute:
-                        attribute = attribute[child_tag]
             # Handle multiple elements with the same tag name
             if child_tag in attributes:
                 if isinstance(attributes[child_tag], list):
