@@ -753,11 +753,11 @@ class ActiveResource(object):
         for key, value in self.attributes.iteritems():
             if isinstance(value, list):
                 new_value = []
-                for i in value:
-                  if isinstance(i, dict):
-                      new_value.append(i)
+                for item in value:
+                  if isinstance(item, ActiveResource):
+                      new_value.append(item.to_dict())
                   else:
-                      new_value.append(i.to_dict())
+                      new_value.append(item)
                 values[key] = new_value
             elif isinstance(value, ActiveResource):
                 values[key] = value.to_dict()
@@ -952,8 +952,15 @@ class ActiveResource(object):
                 klass = self._find_class_for(key)
                 attr = klass(value)
             elif isinstance(value, list):
-                klass = self._find_class_for_collection(key)
-                attr = [klass(child) for child in value]
+                klass = None
+                attr = []
+                for child in value:
+                    if isinstance(child, dict):
+                        if klass is None:
+                            klass = self._find_class_for_collection(key)
+                        attr.append(klass(child))
+                    else:
+                        attr.append(child)
             else:
                 attr = value
             # Store the actual value in the attributes dictionary

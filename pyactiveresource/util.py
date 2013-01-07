@@ -306,6 +306,22 @@ def json_to_dict(jsonstr):
     return json.loads(jsonstr)
 
 
+def _to_xml_element(obj, root, dasherize):
+    root = dasherize and root.replace('_', '-') or root
+    root_element = ET.Element(root)
+    if isinstance(obj, list):
+        root_element.set('type', 'array')
+        for value in obj:
+            root_element.append(_to_xml_element(value, singularize(root), dasherize))
+    elif isinstance(obj, dict):
+        for key, value in obj.iteritems():
+            root_element.append(_to_xml_element(value, key, dasherize))
+    else:
+        serialize(obj, root_element)
+
+    return root_element
+
+
 def to_xml(obj, root='object', pretty=False, header=True, dasherize=True):
     """Convert a dictionary or list to an XML string.
 
@@ -319,26 +335,7 @@ def to_xml(obj, root='object', pretty=False, header=True, dasherize=True):
     Returns:
         An xml string.
     """
-    root = dasherize and root.replace('_', '-') or root
-    root_element = ET.Element(root)
-    if isinstance(obj, list):
-        root_element.set('type', 'array')
-        for i in obj:
-            element = ET.fromstring(
-                    to_xml(i, root=singularize(root), header=False,
-                           pretty=pretty, dasherize=dasherize))
-            root_element.append(element)
-    else:
-        for key, value in obj.iteritems():
-            key = dasherize and key.replace('_', '-') or key
-            if isinstance(value, dict) or isinstance(value, list):
-                element = ET.fromstring(
-                    to_xml(value, root=key, header=False,
-                           pretty=pretty, dasherize=dasherize))
-                root_element.append(element)
-            else:
-                element = ET.SubElement(root_element, key)
-                serialize(value, element)
+    root_element = _to_xml_element(obj, root, dasherize)
     if pretty:
         xml_pretty_format(root_element)
     xml_data = ET.tostring(root_element)

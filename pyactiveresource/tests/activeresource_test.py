@@ -19,6 +19,13 @@ class Error(Exception):
     pass
 
 
+class Store(activeresource.ActiveResource):
+    _site = 'http://localhost'
+
+class Address(activeresource.ActiveResource):
+    _site = 'http://localhost/people/$person_id/'
+
+
 class ActiveResourceTest(unittest.TestCase):
     """Tests for activeresource.ActiveResource."""
 
@@ -59,14 +66,9 @@ class ActiveResourceTest(unittest.TestCase):
 
         class Person(activeresource.ActiveResource):
             _site = 'http://localhost'
+
         self.person = Person
-
-        class Store(activeresource.ActiveResource):
-            _site = 'http://localhost'
         self.store = Store
-
-        class Address(activeresource.ActiveResource):
-            _site = 'http://localhost/people/$person_id/'
         self.address = Address
 
     def test_find_one(self):
@@ -566,6 +568,20 @@ class ActiveResourceTest(unittest.TestCase):
         parsed = util.json_to_dict(json)
         self.assertEqual(children, parsed['active_resource']['children'])
 
+    def test_to_xml_should_handle_attributes_containing_lists_of_strings(self):
+        store = self.store({'name': 'foo', 'id': 1})
+        store.websites = ['http://example.com', 'http://store.example.com']
+        xml = store.to_xml()
+        parsed = util.xml_to_dict(xml, saveroot=False)
+        self.assertEqual(['http://example.com', 'http://store.example.com'], parsed['websites'])
+
+    def test_to_json_should_handle_attributes_containing_lists_of_strings(self):
+        store = self.store({'name': 'foo', 'id': 1})
+        store.websites = ['http://example.com', 'http://store.example.com']
+        json = store.to_json()
+        parsed = util.json_to_dict(json)
+        self.assertEqual(['http://example.com', 'http://store.example.com'], parsed['store']['websites'])
+
     def test_to_xml_should_handle_dasherize_option(self):
         res = activeresource.ActiveResource({'attr_name': 'value'})
         xml = res.to_xml(dasherize=False)
@@ -582,6 +598,21 @@ class ActiveResourceTest(unittest.TestCase):
         b = self.person({'name': 'bar', 'id': 2})
         self.assertNotEqual(hash(a), hash(b))
         self.assertNotEqual(a, b)
+
+    def test_init_with_nested_resource(self):
+        person = self.person({'name': 'Joe', 'id': 1, 'address': {'id': 1, 'street': '12345 Street'}})
+        self.assertEqual(self.address, type(person.address))
+
+    def test_init_with_array_of_nested_resources(self):
+        store = self.store({'name': 'General Store', 'id': 1, 'addresses': [
+            {'id': 1, 'street': '100 Main'},
+            {'id': 2, 'street': '200 Bank'}
+        ]})
+        self.assertEqual(self.address, type(store.addresses[0]))
+
+    def test_init_with_array_of_strings(self):
+        store = self.store({'name': 'General Store', 'id': 1, 'websites': ['http://example.com', 'http://store.example.com']})
+        self.assertEqual(['http://example.com', 'http://store.example.com'], store.websites)
 
 
 if __name__ == '__main__':
