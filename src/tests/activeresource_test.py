@@ -10,6 +10,7 @@ import pickle
 import urllib
 from pyactiveresource import activeresource
 from pyactiveresource import connection
+from pyactiveresource import formats
 from pyactiveresource import util
 from pyactiveresource.tests import http_fake
 
@@ -31,6 +32,7 @@ class ActiveResourceTest(unittest.TestCase):
         self.general_store = {'id': 1, 'name': 'General Store'}
         self.store_update = {'manager_id': 3, 'id': 1, 'name':'General Store'}
         self.xml_headers = {'Content-type': 'application/xml'}
+        self.json_headers = {'Content-type': 'application/json'}
 
         self.matz  = util.to_xml(
                 {'id': 1, 'name': 'Matz'}, root='person')
@@ -88,6 +90,17 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual([self.arnold, self.eb],
                          [p.attributes for p in people])
 
+    def test_find_with_json_format(self):
+        # Return a list of people for a find method call
+        self.http.respond_to(
+            'GET', '/people.json', {},
+            util.to_json([self.arnold, self.eb], root='people'))
+
+        self.person.format = formats.JSONFormat
+        people = self.person.find()
+        self.assertEqual([self.arnold, self.eb],
+                         [p.attributes for p in people])
+
     def test_find_parses_non_array_collection(self):
         collection_xml = '''<people>
                 <person><name>bob</name><id>1</id></person>
@@ -110,6 +123,15 @@ class ActiveResourceTest(unittest.TestCase):
         self.http.respond_to(
             'GET', '/people/1.xml', {}, util.to_xml(self.arnold, root='person'))
 
+        arnold = self.person.find(1)
+        self.assertEqual(self.arnold, arnold.attributes)
+
+    def test_find_by_id_with_json_format(self):
+        # Return a single person for a find(id=<id>) call
+        self.http.respond_to(
+            'GET', '/people/1.json', {}, util.to_json(self.arnold, root='person'))
+
+        self.person.format = formats.JSONFormat
         arnold = self.person.find(1)
         self.assertEqual(self.arnold, arnold.attributes)
 
@@ -221,6 +243,23 @@ class ActiveResourceTest(unittest.TestCase):
             'PUT', '/stores/1.xml', self.xml_headers,
             util.to_xml(self.store_update, root='store'))
 
+        store = self.store(self.store_new)
+        store.save()
+        self.assertEqual(self.general_store, store.attributes)
+        store.manager_id = 3
+        store.save()
+
+    def test_save_with_json_format(self):
+        # Return an object with id for a post(save) request.
+        self.http.respond_to(
+            'POST', '/stores.json', self.json_headers,
+            util.to_json(self.general_store))
+        # Return an object for a put request.
+        self.http.respond_to(
+            'PUT', '/stores/1.json', self.json_headers,
+            util.to_json(self.store_update, root='store'))
+
+        self.store.format = formats.JSONFormat
         store = self.store(self.store_new)
         store.save()
         self.assertEqual(self.general_store, store.attributes)

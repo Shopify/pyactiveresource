@@ -315,6 +315,76 @@ class UtilTest(unittest.TestCase):
         query = util.to_query({'var': {'a': 1, 'b':{'c': 2}}})
         self.assertEqual(set(['var%5Ba%5D=1', 'var%5Bb%5D%5Bc%5D=2']), set(query.split('&')))
 
+    def test_json_to_dict_single_record(self):
+        """Test the json_to_dict function."""
+        topic_json = '''{
+              "topic": {
+                "title": "The First Topic",
+                "author_name": "David",
+                "id": 1,
+                "approved": true,
+                "replies_count": 0,
+                "replies_close_in": 2592000000,
+                "written_on": "2003-07-16",
+                "viewed_at": "2003-07-16T09:28:00+0000",
+                "content": "--- \\n1: should be an integer\\n:message: Have a nice day\\narray: \\n- should-have-dashes: true\\n  should_have_underscores: true\\n",
+                "author_email_address": "david@loudthinking.com",
+                "parent_id": null,
+                "ad_revenue": 1.5,
+                "optimum_viewing_angle": 135.0,
+                "resident": "yes"
+              }
+            }'''
+
+        expected_topic_dict = {
+            'title': 'The First Topic',
+            'author_name': 'David',
+            'id': 1,
+            'approved': True,
+            'replies_count': 0,
+            'replies_close_in': 2592000000L,
+            'written_on': "2003-07-16",
+            'viewed_at': "2003-07-16T09:28:00+0000",
+            'content': "--- \n1: should be an integer\n:message: Have a nice day\narray: \n- should-have-dashes: true\n  should_have_underscores: true\n",
+            'author_email_address': 'david@loudthinking.com',
+            'parent_id': None,
+            'ad_revenue': 1.5,
+            'optimum_viewing_angle': 135.0,
+            'resident': 'yes'
+            }
+
+        self.assertEqual(expected_topic_dict,
+                         util.json_to_dict(topic_json)['topic'])
+
+    def test_json_to_dict_multiple_records(self):
+        """Test the json to dict function."""
+        topics_json = '''{
+             "topics": [
+               { "title": "The First Topic" },
+               { "title": "The Second Topic" }
+             ]
+           }'''
+
+        expected_topic_dicts = [
+              { 'title': 'The First Topic' },
+              { 'title': 'The Second Topic' },
+            ]
+
+        self.assertEqual(expected_topic_dicts,
+                         util.json_to_dict(topics_json)['topics'])
+
+    def test_to_json_should_allow_unicode(self):
+        json = util.to_json({'data': u'\xe9'})
+        self.assert_('\u00e9' in json)
+
+    def test_to_json_should_allow_utf8_encoded_strings(self):
+        json = util.to_json({'data': u'\xe9'.encode('utf-8')})
+        self.assert_('\u00e9' in json)
+
+    def test_to_json_with_root(self):
+        xml = util.to_xml({'title': 'Test'}, root='product')
+        self.assert_('product' in xml)
+
 
 if __name__ == '__main__':
     unittest.main()

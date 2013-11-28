@@ -745,6 +745,12 @@ class ActiveResource(object):
                            header=header, pretty=pretty,
                            dasherize=dasherize)
 
+    def to_json(self, root=True):
+        """Convert the object to a json string."""
+        if root == True:
+            root = self._singular
+        return util.to_json(self.to_dict(), root=root)
+
     def reload(self):
         """Connect to the server and update this resource's attributes.
 
