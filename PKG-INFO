@@ -1,0 +1,18 @@
+Metadata-Version: 1.0
+Name: pyactiveresource
+Version: 1.0.2
+Summary: ActiveResource for Python
+Home-page: http://code.google.com/p/pyactiveresource/
+Author: Jared Kuolt
+Author-email: me@superjared.com
+License: MIT License
+Description: UNKNOWN
+Platform: any
+Classifier: Development Status :: 5 - Production/Stable
+Classifier: Intended Audience :: Developers
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Classifier: Programming Language :: Python
+Classifier: Topic :: Software Development
+Classifier: Topic :: Software Development :: Libraries
+Classifier: Topic :: Software Development :: Libraries :: Python Modules
