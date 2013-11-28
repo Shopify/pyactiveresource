@@ -578,7 +578,7 @@ class ActiveResource(object):
         return '%(prefix)s/%(plural)s.%(format)s%(query)s' % {
                 'prefix': cls._prefix(prefix_options),
                 'plural': cls._plural,
-                'format': cls._format.extension,
+                'format': cls.format.extension,
                 'query': cls._query_string(query_options)}
 
     @classmethod
@@ -991,7 +991,7 @@ class ActiveResource(object):
              'plural': self._plural,
              'id': self.id,
              'method_name': method_name,
-             'format': self._format.extension,
+             'format': self.klass.format.extension,
              'query': self._query_string(query_options)})
         return path
 
@@ -1011,7 +1011,7 @@ class ActiveResource(object):
             {'prefix': self.klass.prefix(prefix_options),
              'plural': self._plural,
              'method_name': method_name,
-             'format': self._format.extension,
+             'format': self.klass.format.extension,
              'query': self._query_string(query_options)})
         return path
 
