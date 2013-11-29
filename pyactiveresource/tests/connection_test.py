@@ -113,6 +113,14 @@ class ConnectionTest(unittest.TestCase):
         response = self.connection.get('/people/1.json')
         self.assertEqual(response['name'], 'Matz')
 
+    def test_get_with_xml_format(self):
+        person = util.to_xml({'id': 1, 'name': 'Matz'}, root='person')
+        self.http.respond_to(
+            'GET', 'http://localhost/people/1.xml', {}, person)
+        self.connection.format = formats.XMLFormat
+        response = self.connection.get('/people/1.xml')
+        self.assertEqual(response['name'], 'Matz')
+
     def test_head(self):
         self.http.respond_to('HEAD', 'http://localhost/people/1.json', {}, '')
         self.assertFalse(self.connection.head('/people/1.json').body)
@@ -150,6 +158,16 @@ class ConnectionTest(unittest.TestCase):
         self.connection.format = formats.JSONFormat
         response = self.connection.post('/people.json')
         self.assertEqual('/people/5.json', response['Location'])
+
+    def test_post_with_xml_format(self):
+        content_headers = {'Content-Length': '0',
+                           'Content-Type': 'application/xml'}
+        self.http.respond_to(
+            'POST', '/people.xml', content_headers,
+            '', 200, {'Location': '/people/5.xml'})
+        self.connection.format = formats.XMLFormat
+        response = self.connection.post('/people.xml')
+        self.assertEqual('/people/5.xml', response['Location'])
 
     def test_post_with_header(self):
         header = self.header

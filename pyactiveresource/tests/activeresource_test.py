@@ -90,13 +90,13 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual([self.arnold, self.eb],
                          [p.attributes for p in people])
 
-    def test_find_with_json_format(self):
+    def test_find_with_xml_format(self):
         # Return a list of people for a find method call
         self.http.respond_to(
-            'GET', '/people.json', {},
-            util.to_json([self.arnold, self.eb], root='people'))
+            'GET', '/people.xml', {},
+            util.to_xml([self.arnold, self.eb], root='people'))
 
-        self.person.format = formats.JSONFormat
+        self.person.format = formats.XMLFormat
         people = self.person.find()
         self.assertEqual([self.arnold, self.eb],
                          [p.attributes for p in people])
@@ -123,12 +123,12 @@ class ActiveResourceTest(unittest.TestCase):
         arnold = self.person.find(1)
         self.assertEqual(self.arnold, arnold.attributes)
 
-    def test_find_by_id_with_json_format(self):
+    def test_find_by_id_with_xml_format(self):
         # Return a single person for a find(id=<id>) call
         self.http.respond_to(
-            'GET', '/people/1.json', {}, util.to_json(self.arnold, root='person'))
+            'GET', '/people/1.xml', {}, util.to_xml(self.arnold, root='person'))
 
-        self.person.format = formats.JSONFormat
+        self.person.format = formats.XMLFormat
         arnold = self.person.find(1)
         self.assertEqual(self.arnold, arnold.attributes)
 
@@ -247,6 +247,23 @@ class ActiveResourceTest(unittest.TestCase):
         store.manager_id = 3
         store.save()
 
+    def test_save_xml_format(self):
+        # Return an object with id for a post(save) request.
+        self.http.respond_to(
+            'POST', '/stores.xml', self.xml_headers,
+            util.to_xml(self.general_store))
+        # Return an object for a put request.
+        self.http.respond_to(
+            'PUT', '/stores/1.xml', self.xml_headers,
+            util.to_xml(self.store_update, root='store'))
+
+        self.store.format = formats.XMLFormat
+        store = self.store(self.store_new)
+        store.save()
+        self.assertEqual(self.general_store, store.attributes)
+        store.manager_id = 3
+        store.save()
+
     def test_save_should_clear_errors(self):
       self.http.respond_to(
           'POST', '/stores.json', self.json_headers,
@@ -260,6 +277,16 @@ class ActiveResourceTest(unittest.TestCase):
         self.http.respond_to('POST', '/stores.json', self.json_headers,
                 '''{"errors":{"name":["already exists"]}}''', 422)
         self.store.format = formats.JSONFormat
+        store = self.store(self.store_new)
+        self.assertEqual(False, store.save())
+        self.assertEqual({ 'name': ['already exists'] }, store.errors.errors)
+
+    def test_save_with_errors_xml_format(self):
+        self.http.respond_to('POST', '/stores.xml', self.xml_headers,
+                '''<errors>
+                    <error>Name already exists</error>
+                </errors>''', 422)
+        self.store.format = formats.XMLFormat
         store = self.store(self.store_new)
         self.assertEqual(False, store.save())
         self.assertEqual({ 'name': ['already exists'] }, store.errors.errors)
