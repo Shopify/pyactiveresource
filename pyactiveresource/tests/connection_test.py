@@ -24,12 +24,12 @@ class ConnectionTest(unittest.TestCase):
         '''Create test objects.'''
         matz = {'id': 1, 'name': 'Matz'}
         david = {'id': 2, 'name': 'David'}
-        self.matz  = util.to_xml(matz, root='person')
-        self.david = util.to_xml(david, root='person') 
-        self.people = util.to_xml([matz, david], root='people')
-        self.people_single = util.to_xml(
+        self.matz  = util.to_json(matz, root='person')
+        self.david = util.to_json(david, root='person') 
+        self.people = util.to_json([matz, david], root='people')
+        self.people_single = util.to_json(
             [matz], root='people-single-elements')
-        self.people_empty = util.to_xml([], root='people-empty-elements')
+        self.people_empty = util.to_json([], root='people-empty-elements')
 
         http_fake.initialize()
         self.http = http_fake.TestHandler
@@ -37,7 +37,7 @@ class ConnectionTest(unittest.TestCase):
         self.http.set_response(Error('Bad request'))
 
         self.zero_length_content_headers = {'Content-Length': '0',
-                                            'Content-Type': 'application/xml'}
+                                            'Content-Type': 'application/json'}
 
         self.header = {'Key': 'value'}
         self.connection = connection.Connection(self.http.site)
@@ -106,16 +106,6 @@ class ConnectionTest(unittest.TestCase):
         self.assertRaises(Exception, connection.Connection, None)
 
     def test_get(self):
-        self.http.respond_to(
-            'GET', 'http://localhost/people/1.xml', {}, self.matz)
-        matz = self.connection.get('/people/1.xml')
-        self.assertEqual(matz['name'], 'Matz')
-
-    def test_head(self):
-        self.http.respond_to('HEAD', 'http://localhost/people/1.xml', {}, '')
-        self.assertFalse(self.connection.head('/people/1.xml').body)
-
-    def test_get_with_json_format(self):
         person = util.to_json({'id': 1, 'name': 'Matz'}, root='person')
         self.http.respond_to(
             'GET', 'http://localhost/people/1.json', {}, person)
@@ -123,47 +113,35 @@ class ConnectionTest(unittest.TestCase):
         response = self.connection.get('/people/1.json')
         self.assertEqual(response['name'], 'Matz')
 
+    def test_head(self):
+        self.http.respond_to('HEAD', 'http://localhost/people/1.json', {}, '')
+        self.assertFalse(self.connection.head('/people/1.json').body)
+
     def test_get_with_header(self):
         self.http.respond_to(
-            'GET', 'http://localhost/people/2.xml', self.header, self.david)
-        david = self.connection.get('/people/2.xml', self.header)
+            'GET', 'http://localhost/people/2.json', self.header, self.david)
+        david = self.connection.get('/people/2.json', self.header)
         self.assertEqual(david['name'], 'David')
   
     def test_get_collection(self):
-        self.http.respond_to('GET', '/people.xml', {}, self.people)
-        people = self.connection.get('/people.xml')
+        self.http.respond_to('GET', '/people.json', {}, self.people)
+        people = self.connection.get('/people.json')
         self.assertEqual('Matz', people[0]['name'])
         self.assertEqual('David', people[1]['name'])
     
     def test_get_collection_single(self):
-        self.http.respond_to('GET', '/people_single_elements.xml', {},
+        self.http.respond_to('GET', '/people_single_elements.json', {},
                              self.people_single)
-        people = self.connection.get('/people_single_elements.xml')
+        people = self.connection.get('/people_single_elements.json')
         self.assertEqual('Matz', people[0]['name'])
     
     def test_get_collection_empty(self):
-        self.http.respond_to('GET', '/people_empty_elements.xml', {},
+        self.http.respond_to('GET', '/people_empty_elements.json', {},
                              self.people_empty)
-        people = self.connection.get('/people_empty_elements.xml')
+        people = self.connection.get('/people_empty_elements.json')
         self.assertEqual([], people)
-  
+
     def test_post(self):
-        self.http.respond_to(
-            'POST', '/people.xml', self.zero_length_content_headers,
-            '', 200, {'Location': '/people/5.xml'})
-        response = self.connection.post('/people.xml')
-        self.assertEqual('/people/5.xml', response['Location'])
-
-    def test_post_with_header(self):
-        header = self.header
-        header.update(self.zero_length_content_headers)
-        self.http.respond_to(
-            'POST', '/members.xml', self.header,
-            '', 201, {'Location': '/people/6.xml'})
-        response = self.connection.post('/members.xml', self.header)
-        self.assertEqual('/people/6.xml', response['Location'])
-
-    def test_post_with_json_format(self):
         content_headers = {'Content-Length': '0',
                            'Content-Type': 'application/json'}
         self.http.respond_to(
@@ -173,27 +151,36 @@ class ConnectionTest(unittest.TestCase):
         response = self.connection.post('/people.json')
         self.assertEqual('/people/5.json', response['Location'])
 
+    def test_post_with_header(self):
+        header = self.header
+        header.update(self.zero_length_content_headers)
+        self.http.respond_to(
+            'POST', '/members.json', self.header,
+            '', 201, {'Location': '/people/6.json'})
+        response = self.connection.post('/members.json', self.header)
+        self.assertEqual('/people/6.json', response['Location'])
+
     def test_put(self):
-        self.http.respond_to('PUT', '/people/1.xml',
+        self.http.respond_to('PUT', '/people/1.json',
                              self.zero_length_content_headers, '', 204)
-        response = self.connection.put('/people/1.xml')
+        response = self.connection.put('/people/1.json')
         self.assertEqual(204, response.code)
   
     def test_put_with_header(self):
         header = self.header
         header.update(self.zero_length_content_headers)
-        self.http.respond_to('PUT', '/people/2.xml', header, '', 204)
-        response = self.connection.put('/people/2.xml', self.header)
+        self.http.respond_to('PUT', '/people/2.json', header, '', 204)
+        response = self.connection.put('/people/2.json', self.header)
         self.assertEqual(204, response.code)
   
     def test_delete(self):
-        self.http.respond_to('DELETE', '/people/1.xml', {}, '')
-        response = self.connection.delete('/people/1.xml')
+        self.http.respond_to('DELETE', '/people/1.json', {}, '')
+        response = self.connection.delete('/people/1.json')
         self.assertEqual(200, response.code)
   
     def test_delete_with_header(self):
-        self.http.respond_to('DELETE', '/people/2.xml', self.header, '')
-        response = self.connection.delete('/people/2.xml', self.header)
+        self.http.respond_to('DELETE', '/people/2.json', self.header, '')
+        response = self.connection.delete('/people/2.json', self.header)
         self.assertEqual(200, response.code)
 
 '''
@@ -211,11 +198,9 @@ class ConnectionTest(unittest.TestCase):
       @http = mock('new Net::HTTP')
       self.connection.expects(:http).returns(@http)
       @http.expects(:get).raises(Timeout::Error, 'execution expired')
-      assert_raises(connection.TimeoutError) { self.connection.get('/people_timeout.xml') }
+      assert_raises(connection.TimeoutError) { self.connection.get('/people_timeout.json') }
 '''
 
 
 if __name__ == '__main__':
     unittest.main()
-
-
