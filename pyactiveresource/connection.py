@@ -190,7 +190,7 @@ class Connection(object):
     """A connection object to interface with REST services."""
 
     def __init__(self, site, user=None, password=None, timeout=None,
-                 format=formats.JSONFormat):
+                 format=formats.default):
     
         """Initialize a new Connection object.
 

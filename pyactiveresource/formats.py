@@ -61,3 +61,6 @@ class JSONFormat(Base):
         log = logging.getLogger('pyactiveresource.format')
         log.debug('encoding resource: %r', data)
         return util.to_json(data)
+
+# The Default Format
+default = JSONFormat()

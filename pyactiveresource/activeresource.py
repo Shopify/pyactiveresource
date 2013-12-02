@@ -341,7 +341,7 @@ class ActiveResource(object):
 
     __metaclass__ = ResourceMeta
     _connection = None
-    _format = formats.JSONFormat
+    _format = formats.default
     _headers = None
     _password = None
     _site = None
