@@ -748,16 +748,15 @@ class ActiveResource(object):
 
     # Public instance methods
     def to_dict(self):
-        """Convert the object to a dictionary."""
         values = {}
         for key, value in self.attributes.iteritems():
             if isinstance(value, list):
                 new_value = []
-                for i in value:
-                  if isinstance(i, dict):
-                      new_value.append(i)
+                for item in value:
+                  if isinstance(item, ActiveResource):
+                      new_value.append(item.to_dict())
                   else:
-                      new_value.append(i.to_dict())
+                      new_value.append(item)
                 values[key] = new_value
             elif isinstance(value, ActiveResource):
                 values[key] = value.to_dict()
@@ -768,22 +767,32 @@ class ActiveResource(object):
     def encode(self, **options):
         return getattr(self, "to_" + self.klass.format.extension)(**options)
 
-    def to_xml(self, root=None, header=True, pretty=False, dasherize=True):
-        """Convert the object to an xml string.
+    @staticmethod
+    def __to_xml_element(obj, root, dasherize):
+        root = dasherize and root.replace('_', '-') or root
+        root_element = util.ET.Element(root)
+        if isinstance(obj, list):
+            root_element.set('type', 'array')
+            for value in obj:
+                root_element.append(ActiveResource.__to_xml_element(value, util.singularize(root), dasherize))
+        elif isinstance(obj, dict):
+            for key, value in obj.iteritems():
+                root_element.append(ActiveResource.__to_xml_element(value, key, dasherize))
+        else:
+            util.serialize(obj, root_element)
 
-        Args:
-            root: The name of the root element for xml output.
-            header: Whether to include the xml header.
-            pretty: Whether to "pretty-print" format the output.
-            dasherize: Whether to dasherize the xml attribute names.
-        Returns:
-            An xml string.
-        """
+        return root_element
+
+    def to_xml(self, root=None, header=True, pretty=False, dasherize=True):
         if not root:
             root = self._singular
-        return util.to_xml(self.to_dict(), root=root,
-                           header=header, pretty=pretty,
-                           dasherize=dasherize)
+        root_element = ActiveResource.__to_xml_element(self.to_dict(), root, dasherize)
+        if pretty:
+            xml_pretty_format(root_element)
+        xml_data = util.ET.tostring(root_element)
+        if header:
+            return util.XML_HEADER + '\n' + xml_data
+        return xml_data
 
     def to_json(self, root=True):
         """Convert the object to a json string."""
@@ -938,13 +947,6 @@ class ActiveResource(object):
         return hash(tuple(self.attributes.items()))
 
     def _update(self, attributes):
-        """Update the object with the given attributes.
-
-        Args:
-            attributes: A dictionary of attributes.
-        Returns:
-            None
-        """
         if not isinstance(attributes, dict):
             return
         for key, value in attributes.items():
@@ -952,11 +954,17 @@ class ActiveResource(object):
                 klass = self._find_class_for(key)
                 attr = klass(value)
             elif isinstance(value, list):
-                klass = self._find_class_for_collection(key)
-                attr = [klass(child) for child in value]
+                klass = None
+                attr = []
+                for child in value:
+                    if isinstance(child, dict):
+                        if klass is None:
+                            klass = self._find_class_for_collection(key)
+                        attr.append(klass(child))
+                    else:
+                        attr.append(child)
             else:
                 attr = value
-            # Store the actual value in the attributes dictionary
             self.attributes[key] = attr
 
     @classmethod
