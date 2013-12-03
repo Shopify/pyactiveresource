@@ -80,7 +80,7 @@ class TestHandler(urllib2.HTTPHandler, urllib2.HTTPSHandler):
 
         Args:
             method: The http method (e.g. 'get', 'put' etc.)
-            path: The path being requested (e.g. '/collection/id.xml')
+            path: The path being requested (e.g. '/collection/id.json')
             request_headers: Dictionary of headers passed along with the request
             body: The string that should be returned for a matching request
             code: The http response code to return
