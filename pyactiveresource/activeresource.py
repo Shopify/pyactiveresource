@@ -266,6 +266,7 @@ class ResourceMeta(type):
 
     def set_headers(cls, value):
         cls._headers = value
+    
     headers = property(get_headers, set_headers, None,
                        'HTTP headers.')
 
@@ -275,6 +276,7 @@ class ResourceMeta(type):
     def set_timeout(cls, value):
         cls._connection = None
         cls._timeout = value
+    
     timeout = property(get_timeout, set_timeout, None,
                        'Socket timeout for HTTP operations')
 
@@ -284,6 +286,7 @@ class ResourceMeta(type):
     def set_format(cls, value):
         cls._connection = None
         cls._format = value
+    
     format = property(get_format, set_format, None,
                        'A format object for encoding/decoding requests')
 
@@ -292,6 +295,7 @@ class ResourceMeta(type):
 
     def set_plural(cls, value):
         cls._plural = value
+    
     plural = property(get_plural, set_plural, None,
                       'The plural name of this object type.')
 
@@ -300,6 +304,7 @@ class ResourceMeta(type):
 
     def set_singular(cls, value):
         cls._singular = value
+    
     singular = property(get_singular, set_singular, None,
                         'The singular name of this object type.')
 
@@ -336,7 +341,7 @@ class ActiveResource(object):
 
     __metaclass__ = ResourceMeta
     _connection = None
-    _format = formats.XMLFormat
+    _format = formats.JSONFormat
     _headers = None
     _password = None
     _site = None
