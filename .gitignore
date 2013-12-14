@@ -1,0 +1,6 @@
+*.pyc
+*.swp
+/MANIFEST
+/build/
+/dist
+tags

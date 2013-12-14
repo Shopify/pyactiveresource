@@ -5,9 +5,9 @@ version = '1.0.2'
 setup(name='pyactiveresource',
       version=version,
       description='ActiveResource for Python',
-      author='Jared Kuolt',
-      author_email='me@superjared.com',
-      url='http://code.google.com/p/pyactiveresource/',
+      author='Shopify',
+      author_email='developers@shopify.com',
+      url='https://github.com/Shopify/pyactiveresource/',
       packages=['pyactiveresource'],
       package_dir={'pyactiveresource':'src'},
       license='MIT License',
@@ -20,5 +20,4 @@ setup(name='pyactiveresource',
                    'Topic :: Software Development', 
                    'Topic :: Software Development :: Libraries', 
                    'Topic :: Software Development :: Libraries :: Python Modules']
-      
     )
