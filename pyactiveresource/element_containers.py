@@ -1,5 +1,3 @@
-#!/usr/bin/python2.4
-#
 # Copyright 2010 Google Inc. All Rights Reserved.
 
 __author__ = 'danv@google.com (Daniel Van Derveer)'

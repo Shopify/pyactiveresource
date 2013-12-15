@@ -1,4 +1,3 @@
-#!/usr/bin/python2.4
 # Copyright 2008 Google Inc. All Rights Reserved.
 
 """Utilities for pyActiveResource."""
@@ -463,11 +462,3 @@ def xml_to_dict(xmlobj, saveroot=True):
                                               element.items())
     else:
         return element.text
-
-
-def main():
-    pass
-
-
-if __name__ == '__main__':
-    main()

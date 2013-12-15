@@ -1,4 +1,3 @@
-#!/usr/bin/python2.4
 # Copyright 2008 Google Inc. All Rights Reserved.
 
 """A fake HTTP connection for testing"""

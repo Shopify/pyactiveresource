@@ -1,4 +1,3 @@
-#!/usr/bin/python2.4
 # Authors: Jared Kuolt <me@superjared.com>, Mark Roach <mrroach@google.com>
 
 """Connect to and interact with a REST server and its objects."""
