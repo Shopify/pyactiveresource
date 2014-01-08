@@ -12,7 +12,7 @@ from StringIO import StringIO
 from pyactiveresource import connection
 from pyactiveresource import util
 from pyactiveresource import formats
-from pyactiveresource.tests import http_fake
+from pyactiveresource.testing import http_fake
 
 
 class Error(Exception):

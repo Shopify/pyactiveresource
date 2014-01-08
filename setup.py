@@ -8,9 +8,9 @@ setup(name='pyactiveresource',
       author='Shopify',
       author_email='developers@shopify.com',
       url='https://github.com/Shopify/pyactiveresource/',
-      packages=['pyactiveresource', 'pyactiveresource/tests'],
+      packages=['pyactiveresource', 'pyactiveresource/testing'],
       license='MIT License',
-      test_suite='pyactiveresource.tests',
+      test_suite='test',
       tests_require=[
           'python-dateutil<2.0', # >= 2.0 is for python>=3.0
           'PyYAML',
