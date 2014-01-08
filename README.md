@@ -24,4 +24,4 @@ Running Tests
 
 Run the following from the top level directory
 
-    PYTHONPATH=. python pyactiveresource/tests/alltests.py
+    python setup.py test
