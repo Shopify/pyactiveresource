@@ -10,7 +10,8 @@ setup(name='pyactiveresource',
       url='https://github.com/Shopify/pyactiveresource/',
       packages=['pyactiveresource', 'pyactiveresource/tests'],
       license='MIT License',
-      test_requires=[
+      test_suite='pyactiveresource.tests',
+      tests_require=[
           'python-dateutil<2.0', # >= 2.0 is for python>=3.0
           'PyYAML',
       ],
