@@ -1,4 +1,4 @@
-from distutils.core import setup
+from setuptools import setup
 
 version = '2.0.0'
 
@@ -8,8 +8,12 @@ setup(name='pyactiveresource',
       author='Shopify',
       author_email='developers@shopify.com',
       url='https://github.com/Shopify/pyactiveresource/',
-      packages=['pyactiveresource'],
+      packages=['pyactiveresource', 'pyactiveresource/tests'],
       license='MIT License',
+      test_requires=[
+          'python-dateutil<2.0', # >= 2.0 is for python>=3.0
+          'PyYAML',
+      ],
       platforms=['any'],
       classifiers=['Development Status :: 5 - Production/Stable',
                    'Intended Audience :: Developers', 
