@@ -12,4 +12,4 @@ script: 'python setup.py test'
 
 notifications:
   flowdock: 
-    secure: "RCgSxzMScnqK6bOwkv9sWSdieLBeJla8NcDtM/QmuFW8soTgV6qCTAPAGd4lpjg4vGTaM3DsdHU5GMDbgdWN5dE2Rf09ayFqiZg8OloPMQ63KIwLJyVcw3cVJO5i7smjIpsSjPjBkvAXHIOFcKdsnuYGS4YD8hjl+QrZ3ghi440="
+    secure: "dRAjViOTMTs2VSO0gKW82yUAyD/8fqbOW+Q4gppqCqORx7vWZr6r1Uidv/QaFwt0qTYYrVH3c24QSaP4Is36S0Ima5SI/ojh4IVmpJu7Peh4gKwgp8Z6nnsh/7aZFp74CsDgUFeijxW3IVqJZ/eEFI7wRsER5lM1YlCGhGN2YyU="
