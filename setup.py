@@ -1,6 +1,13 @@
 from setuptools import setup
+import sys
 
 version = '2.0.0'
+
+if sys.version_info >= (3,):
+    python_dateutils_version = 'python-dateutil>=2.0'
+else:
+    python_dateutils_version = 'python-dateutil<2.0'
+
 
 setup(name='pyactiveresource',
       version=version,
@@ -12,7 +19,7 @@ setup(name='pyactiveresource',
       license='MIT License',
       test_suite='test',
       tests_require=[
-          'python-dateutil<2.0', # >= 2.0 is for python>=3.0
+          python_dateutils_version,
           'PyYAML',
       ],
       platforms=['any'],
