@@ -33,7 +33,7 @@ class XMLFormat(Base):
         log.debug('decoding resource: %s', resource_string)
         try:
             data = util.xml_to_dict(resource_string, saveroot=False)
-        except util.Error, err:
+        except util.Error as err:
             raise Error(err)
         return remove_root(data)
 
@@ -50,7 +50,7 @@ class JSONFormat(Base):
         log.debug('decoding resource: %s', resource_string)
         try:
             data = util.json_to_dict(resource_string)
-        except ValueError, err:
+        except ValueError as err:
             raise Error(err)
         return remove_root(data)
 

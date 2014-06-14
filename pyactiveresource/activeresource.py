@@ -829,7 +829,7 @@ class ActiveResource(object):
                 new_id = self._id_from_response(response)
                 if new_id:
                     self.id = new_id
-        except connection.ResourceInvalid, err:
+        except connection.ResourceInvalid as err:
             if self.klass.format == formats.XMLFormat:
                 self.errors.from_xml(err.response.body)
             elif self.klass.format == formats.JSONFormat:

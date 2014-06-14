@@ -358,7 +358,7 @@ def xml_to_dict(xmlobj, saveroot=True):
             return {}
         try:
             element = ET.fromstring(xmlobj)
-        except Exception, err:
+        except Exception as err:
             raise Error('Unable to parse xml data: %s' % err)
     else:
         element = xmlobj
@@ -391,7 +391,7 @@ def xml_to_dict(xmlobj, saveroot=True):
                         time.strptime(element.text, '%Y-%m-%dT%H:%M:%S+0000'))
 
                 return datetime.datetime.utcfromtimestamp(timestamp)
-            except ValueError, err:
+            except ValueError as err:
                 raise Error('Unable to parse timestamp. Install dateutil'
                             ' (http://labix.org/python-dateutil) or'
                             ' pyxml (http://pyxml.sf.net/topics/)'

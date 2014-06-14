@@ -283,9 +283,9 @@ class Connection(object):
             http_response = None
             try:
                 http_response = self._handle_error(self._urlopen(request))
-            except urllib2.HTTPError, err:
+            except urllib2.HTTPError as err:
                 http_response = self._handle_error(err)
-            except urllib2.URLError, err:
+            except urllib2.URLError as err:
                 raise Error(err, url)
             response = Response.from_httpresponse(http_response)
             self.log.debug('Response(code=%d, headers=%s, msg="%s")',
