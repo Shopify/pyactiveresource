@@ -122,7 +122,7 @@ class Errors(object):
             decoded = {}
         if not decoded:
             decoded = {}
-        if isinstance(decoded, dict) and (decoded.has_key('errors') or len(decoded) == 0):
+        if isinstance(decoded, dict) and ('errors' in decoded or len(decoded) == 0):
             errors = decoded.get('errors', {})
             if isinstance(errors, list):
                 # Deprecated in ActiveResource
