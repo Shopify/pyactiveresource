@@ -49,7 +49,7 @@ class JSONFormat(Base):
         log = logging.getLogger('pyactiveresource.format')
         log.debug('decoding resource: %s', resource_string)
         try:
-            data = util.json_to_dict(resource_string)
+            data = util.json_to_dict(resource_string.decode('utf-8'))
         except ValueError as err:
             raise Error(err)
         return remove_root(data)
@@ -59,4 +59,4 @@ class JSONFormat(Base):
         """Convert a dictionary to a resource string."""
         log = logging.getLogger('pyactiveresource.format')
         log.debug('encoding resource: %r', data)
-        return util.to_json(data)
+        return util.to_json(data).encode('utf-8')

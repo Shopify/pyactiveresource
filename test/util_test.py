@@ -8,13 +8,14 @@ __author__ = 'Mark Roach (mrroach@google.com)'
 import datetime
 import decimal
 import unittest
+import six
 from pyactiveresource import util
 from pprint import pprint
 
 
 def diff_dicts(d1, d2):
     """Print the differences between two dicts. Useful for troubleshooting."""
-    pprint([(k,v) for k,v in d2.iteritems()
+    pprint([(k,v) for k,v in d2.items()
             if v != d1[k]])
 
 
@@ -47,7 +48,7 @@ class UtilTest(unittest.TestCase):
             'id': 1,
             'approved': True,
             'replies_count': 0,
-            'replies_close_in': 2592000000L,
+            'replies_close_in': 2592000000,
             'written_on': datetime.date(2003, 7, 16),
             'viewed_at': util.date_parse('2003-07-16T9:28Z'),
             'content': {':message': 'Have a nice day',
@@ -101,7 +102,7 @@ class UtilTest(unittest.TestCase):
           'id': 1,
           'approved': False,
           'replies_count': 0,
-          'replies_close_in': 2592000000L,
+          'replies_close_in': 2592000000,
           'written_on': datetime.date(2003, 7, 16),
           'viewed_at': util.date_parse('2003-07-16T09:28Z'),
           'content': 'Have a nice day',
@@ -218,7 +219,7 @@ class UtilTest(unittest.TestCase):
             'price': decimal.Decimal('12.50'),
             'expires_at': util.date_parse('2007-12-25T12:34:56Z'),
             'notes': '',
-            'illustration': 'babe.png'}
+            'illustration': b'babe.png'}
 
         self.assertEqual(expected_bacon_dict,
                          util.xml_to_dict(bacon_xml, saveroot=True)['bacon'])
@@ -271,19 +272,24 @@ class UtilTest(unittest.TestCase):
 
     def test_to_xml_should_allow_unicode(self):
         xml = util.to_xml({'data': u'\xe9'})
-        self.assert_('<data>&#233;</data>' in xml)
+        self.assert_(b'<data>&#233;</data>' in xml)
 
-    def test_to_xml_should_allow_utf8_encoded_strings(self):
-        xml = util.to_xml({'data': u'\xe9'.encode('utf-8')})
-        self.assert_('<data>&#233;</data>' in xml)
+    if six.PY2:
+        def test_to_xml_should_allow_utf8_encoded_strings(self):
+            xml = util.to_xml({'data': u'\xe9'.encode('utf-8')})
+            self.assert_(b'<data>&#233;</data>' in xml)
+    else:
+        def test_to_xml_should_encode_bytes_as_base64(self):
+            xml = util.to_xml({'data': b'\xe9'})
+            self.assert_(b'<data type="base64Binary">6Q==</data>' in xml)
 
     def test_to_xml_should_allow_disabling_dasherization(self):
         xml = util.to_xml({'key_name': 'value'}, dasherize=False)
-        self.assert_('<key_name>value</key_name>' in xml)
+        self.assert_(b'<key_name>value</key_name>' in xml)
 
     def test_to_xml_should_honor_dasherize_option_for_children(self):
         xml = util.to_xml([{'key_name': 'value'}], dasherize=False)
-        self.assert_('<key_name>value</key_name>' in xml)
+        self.assert_(b'<key_name>value</key_name>' in xml)
 
     def test_to_xml_should_consider_attributes_on_element_with_children(self):
         custom_field_xml = '''
@@ -300,7 +306,7 @@ class UtilTest(unittest.TestCase):
         self.assertEqual(expected, result)
 
     def test_to_query_with_utf8_encoded_strings(self):
-        query = util.to_query({'var': '\xC3\xA5\xC3\xB1\xC3\xBC\xC3\xA8'})
+        query = util.to_query({'var': b'\xC3\xA5\xC3\xB1\xC3\xBC\xC3\xA8'})
         self.assertEqual('var=%C3%A5%C3%B1%C3%BC%C3%A8', query)
 
     def test_to_query_with_unicode_strings(self):
@@ -342,7 +348,7 @@ class UtilTest(unittest.TestCase):
             'id': 1,
             'approved': True,
             'replies_count': 0,
-            'replies_close_in': 2592000000L,
+            'replies_close_in': 2592000000,
             'written_on': "2003-07-16",
             'viewed_at': "2003-07-16T09:28:00+0000",
             'content': "--- \n1: should be an integer\n:message: Have a nice day\narray: \n- should-have-dashes: true\n  should_have_underscores: true\n",
@@ -374,16 +380,17 @@ class UtilTest(unittest.TestCase):
                          util.json_to_dict(topics_json)['topics'])
 
     def test_to_json_should_allow_unicode(self):
-        json = util.to_json({'data': u'\xe9'})
-        self.assert_('\u00e9' in json)
+        json = util.to_json({'data': u'\u00e9'})
+        self.assert_('\u00e9' in json or '\\u00e9' in json)
 
-    def test_to_json_should_allow_utf8_encoded_strings(self):
-        json = util.to_json({'data': u'\xe9'.encode('utf-8')})
-        self.assert_('\u00e9' in json)
+    if six.PY2:
+        def test_to_json_should_allow_utf8_encoded_strings(self):
+            json = util.to_json({'data': u'\u00e9'.encode('utf-8')})
+            self.assert_('\u00e9' in json)
 
     def test_to_json_with_root(self):
         xml = util.to_xml({'title': 'Test'}, root='product')
-        self.assert_('product' in xml)
+        self.assert_(b'product' in xml)
 
 
 if __name__ == '__main__':

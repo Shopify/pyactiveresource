@@ -18,6 +18,9 @@ setup(name='pyactiveresource',
       packages=['pyactiveresource', 'pyactiveresource/testing'],
       license='MIT License',
       test_suite='test',
+      install_requires=[
+          'six',
+      ],
       tests_require=[
           python_dateutils_version,
           'PyYAML',

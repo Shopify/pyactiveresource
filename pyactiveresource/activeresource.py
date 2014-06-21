@@ -5,10 +5,9 @@
 
 import re
 import sys
-import urllib
-import urllib2
-import urlparse
 from string import Template
+import six
+from six.moves import urllib, range
 from pyactiveresource import connection
 from pyactiveresource import element_containers
 from pyactiveresource import formats
@@ -85,7 +84,7 @@ class Errors(object):
 
     def from_hash(self, messages):
         attribute_keys = self.base.attributes.keys()
-        for key, errors in messages.iteritems():
+        for key, errors in six.iteritems(messages):
             for message in errors:
                 if key in attribute_keys:
                     self.add(key, message)
@@ -117,7 +116,7 @@ class Errors(object):
             None
         """
         try:
-            decoded = util.json_to_dict(json_string)
+            decoded = util.json_to_dict(json_string.decode('utf-8'))
         except ValueError:
             decoded = {}
         if not decoded:
@@ -156,7 +155,7 @@ class Errors(object):
             An array of error strings.
         """
         messages = []
-        for key, errors in self.errors.iteritems():
+        for key, errors in six.iteritems(self.errors):
             for error in errors:
                 if key == 'base':
                     messages.append(error)
@@ -246,14 +245,11 @@ class ResourceMeta(type):
 
     def set_site(cls, value):
         if value is not None:
-            host = urlparse.urlsplit(value)[1]
-            auth_info, host = urllib2.splituser(host)
-            if auth_info:
-                user, password = urllib2.splitpasswd(auth_info)
-                if user:
-                    cls._user = urllib.unquote(user)
-                if password:
-                    cls._password = urllib.unquote(password)
+            parts = urllib.parse.urlparse(value)
+            if parts.username:
+                cls._user = urllib.parse.unquote(parts.username)
+            if parts.password:
+                cls._password = urllib.parse.unquote(parts.password)
         cls._connection = None
         cls._site = value
 
@@ -312,7 +308,7 @@ class ResourceMeta(type):
         if hasattr(cls, '_prefix_source'):
             return cls._prefix_source
         else:
-            return urlparse.urlsplit(cls.site)[2]
+            return urllib.parse.urlsplit(cls.site)[2]
 
     def set_prefix_source(cls, value):
         """Set the prefix source, which will be rendered into the prefix."""
@@ -335,10 +331,9 @@ class ResourceMeta(type):
                            'Name of attribute that uniquely identies the resource')
 
 
-class ActiveResource(object):
+class ActiveResource(six.with_metaclass(ResourceMeta, object)):
     """Represents an activeresource object."""
 
-    __metaclass__ = ResourceMeta
     _connection = None
     _format = formats.JSONFormat
     _headers = None
@@ -467,7 +462,7 @@ class ActiveResource(object):
         #TODO(mrroach): figure out prefix_options
         prefix_options = {}
         query_options = {}
-        for key, value in options.iteritems():
+        for key, value in six.iteritems(options):
             if key in cls._prefix_parameters():
                 prefix_options[key] = value
             else:
@@ -654,7 +649,7 @@ class ActiveResource(object):
         return cls.connection.get(url, cls.headers)
 
     @classmethod
-    def _class_post(cls, method_name, body='', **kwargs):
+    def _class_post(cls, method_name, body=b'', **kwargs):
         """Get a nested resource or resources.
 
         Args:
@@ -668,7 +663,7 @@ class ActiveResource(object):
         return cls.connection.post(url, cls.headers, body)
 
     @classmethod
-    def _class_put(cls, method_name, body='', **kwargs):
+    def _class_put(cls, method_name, body=b'', **kwargs):
         """Update a nested resource or resources.
 
         Args:
@@ -749,7 +744,7 @@ class ActiveResource(object):
     def to_dict(self):
         """Convert the object to a dictionary."""
         values = {}
-        for key, value in self.attributes.iteritems():
+        for key, value in six.iteritems(self.attributes):
             if isinstance(value, list):
                 new_value = []
                 for item in value:
@@ -788,7 +783,7 @@ class ActiveResource(object):
         """Convert the object to a json string."""
         if root == True:
             root = self._singular
-        return util.to_json(self.to_dict(), root=root)
+        return util.to_json(self.to_dict(), root=root).encode('utf-8')
 
     def reload(self):
         """Connect to the server and update this resource's attributes.
@@ -927,14 +922,20 @@ class ActiveResource(object):
     def __repr__(self):
         return '%s(%s)' % (self._singular, self.id)
 
-    def __cmp__(self, other):
-        if isinstance(other, self.__class__):
-            return cmp(self.id, other.id)
-        else:
-            return cmp(self.id, other)
+    if six.PY2:
+        def __cmp__(self, other):
+            if isinstance(other, self.__class__):
+                return cmp(self.id, other.id)
+            else:
+                return cmp(self.id, other)
+    else:
+        def __eq__(self, other):
+            return other.__class__ == self.__class__ \
+                   and self.id == other.id \
+                   and self._prefix_options == other._prefix_options
 
     def __hash__(self):
-        return hash(tuple(self.attributes.iteritems()))
+        return hash(tuple(sorted(self.attributes.items())))
 
     def _update(self, attributes):
         """Update the object with the given attributes.
@@ -946,7 +947,7 @@ class ActiveResource(object):
         """
         if not isinstance(attributes, dict):
             return
-        for key, value in attributes.iteritems():
+        for key, value in six.iteritems(attributes):
             if isinstance(value, dict):
                 klass = self._find_class_for(key)
                 attr = klass(value)
@@ -1001,7 +1002,7 @@ class ActiveResource(object):
             class_name = util.camelize(element_name)
 
         module_path = cls.__module__.split('.')
-        for depth in xrange(len(module_path), 0, -1):
+        for depth in range(len(module_path), 0, -1):
             try:
                 __import__('.'.join(module_path[:depth]))
                 module = sys.modules['.'.join(module_path[:depth])]
@@ -1081,7 +1082,7 @@ class ActiveResource(object):
         url = self._custom_method_element_url(method_name, kwargs)
         return self.klass.connection.get(url, self.klass.headers)
 
-    def _instance_post(self, method_name, body='', **kwargs):
+    def _instance_post(self, method_name, body=b'', **kwargs):
         """Create a new resource/nested resource.
 
         Args:
@@ -1099,7 +1100,7 @@ class ActiveResource(object):
             url = self._custom_method_new_element_url(method_name, kwargs)
         return self.klass.connection.post(url, self.klass.headers, body)
 
-    def _instance_put(self, method_name, body='', **kwargs):
+    def _instance_put(self, method_name, body=b'', **kwargs):
         """Update a nested resource.
 
         Args:

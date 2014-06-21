@@ -4,7 +4,7 @@
 
 __author__ = 'Mark Roach (mrroach@google.com)'
 
-import urllib
+from six.moves import urllib
 from pyactiveresource import connection
 from pyactiveresource import formats
 
@@ -39,7 +39,7 @@ class FakeConnection(object):
 
     def _split_path(self, path):
         """Return the path and the query string as a dictionary."""
-        path_only, query_string = urllib.splitquery(path)
+        path_only, query_string = urllib.parse.splitquery(path)
         if query_string:
             query_dict = dict([i.split('=') for i in query_string.split('&')])
         else:
