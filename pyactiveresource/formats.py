@@ -9,7 +9,7 @@ from pyactiveresource import util
 
 def remove_root(data):
     if isinstance(data, dict) and len(data) == 1:
-        return data.values()[0]
+        return next(iter(data.values()))
     return data
 
 class Error(Exception):
