@@ -935,7 +935,7 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
                    and self._prefix_options == other._prefix_options
 
     def __hash__(self):
-        return hash(tuple(sorted(self.attributes.items())))
+        return hash(tuple(sorted(six.iteritems(self.attributes))))
 
     def _update(self, attributes):
         """Update the object with the given attributes.
