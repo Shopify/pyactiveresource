@@ -208,7 +208,7 @@ class Connection(object):
         self.password = password or self.password or ''
 
         if self.user or self.password:
-            self.auth = base64.b64encode(('%s:%s' % (self.user, self.password)).encode('utf-8'))
+            self.auth = base64.b64encode(('%s:%s' % (self.user, self.password)).encode('utf-8')).decode('utf-8')
         else:
             self.auth = None
         self.timeout = timeout
@@ -262,7 +262,7 @@ class Connection(object):
                 request.add_header(key, value)
         if self.auth:
             # Insert basic authentication header
-            request.add_header('Authorization', 'Basic %s' % self.auth)
+            request.add_header('Authorization', 'Basic ' + self.auth)
         if request.headers:
             header_string = '\n'.join([':'.join((k, v)) for k, v in
                                        six.iteritems(request.headers)])
