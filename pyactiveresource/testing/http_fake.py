@@ -91,7 +91,7 @@ class TestHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHandler):
         value = (code, body, response_headers)
         cls._response_map[str(key)] = value
 
-    def do_open(self, http_class, request):
+    def do_open(self, http_class, request, **http_conn_args):
         """Return the response object for the given request.
 
         Overrides the HTTPHandler method of the same name to return a
