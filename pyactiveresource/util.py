@@ -7,11 +7,12 @@ __author__ = 'Mark Roach (mrroach@google.com)'
 import base64
 import calendar
 import decimal
-import element_containers
 import re
 import time
 import datetime
-import urllib
+import six
+from six.moves import urllib
+from pyactiveresource import element_containers
 try:
     import yaml
 except ImportError:
@@ -51,7 +52,7 @@ except ImportError:
     except ImportError:
         from xml.etree import ElementTree as ET
 
-XML_HEADER = '<?xml version="1.0" encoding="UTF-8"?>'
+XML_HEADER = b'<?xml version="1.0" encoding="UTF-8"?>\n'
 
 # Patterns blatently stolen from Rails' Inflector
 PLURALIZE_PATTERNS = [
@@ -118,17 +119,21 @@ UNCOUNTABLES = ['equipment', 'information', 'rice', 'money', 'species',
 # and should return the element type and modified value.
 SERIALIZERS = [
     {'type': bool,
-     'method': lambda value: ('boolean', unicode(value).lower())},
-    {'type': int,
-     'method': lambda value: ('integer', unicode(value))},
-    {'type': long,
-     'method': lambda value: ('integer', unicode(value))},
-    {'type': str,
-     'method': lambda value: (None, unicode(value, 'utf-8'))}]
+     'method': lambda value: ('boolean', six.text_type(value).lower())},
+    {'type': six.integer_types,
+     'method': lambda value: ('integer', six.text_type(value))}]
+if six.PY2:
+    SERIALIZERS.append({
+        'type': str,
+        'method': lambda value: (None, unicode(value, 'utf-8'))})
+else:
+    SERIALIZERS.append({
+        'type': bytes,
+        'method': lambda value: ('base64Binary', base64.b64encode(value).decode('ascii'))})
 
 DEFAULT_SERIALIZER = {
     'type': object,
-    'method': lambda value: (None, unicode(value))}
+    'method': lambda value: (None, six.text_type(value))}
 
 
 class Error(Exception):
@@ -216,23 +221,21 @@ def to_query(query_params):
     """
     def annotate_params(params):
         annotated = {}
-        for key, value in params.iteritems():
+        for key, value in six.iteritems(params):
             if isinstance(value, list):
                 key = '%s[]' % key
             elif isinstance(value, dict):
                 dict_options = {}
-                for dk, dv in value.iteritems():
+                for dk, dv in six.iteritems(value):
                     dict_options['%s[%s]' % (key, dk)] = dv
                 annotated.update(annotate_params(dict_options))
                 continue
-            elif isinstance(value, unicode):
+            elif isinstance(value, six.text_type):
                 value = value.encode('utf-8')
-            else:
-                value = str(value)
             annotated[key] = value
         return annotated
     annotated = annotate_params(query_params)
-    return urllib.urlencode(annotated, True)
+    return urllib.parse.urlencode(annotated, True)
 
 
 def xml_pretty_format(element, level=0):
@@ -313,7 +316,7 @@ def _to_xml_element(obj, root, dasherize):
         for value in obj:
             root_element.append(_to_xml_element(value, singularize(root), dasherize))
     elif isinstance(obj, dict):
-        for key, value in obj.iteritems():
+        for key, value in six.iteritems(obj):
             root_element.append(_to_xml_element(value, key, dasherize))
     else:
         serialize(obj, root_element)
@@ -339,7 +342,7 @@ def to_xml(obj, root='object', pretty=False, header=True, dasherize=True):
         xml_pretty_format(root_element)
     xml_data = ET.tostring(root_element)
     if header:
-        return XML_HEADER + '\n' + xml_data
+        return XML_HEADER + xml_data
     return xml_data
 
 
@@ -352,13 +355,13 @@ def xml_to_dict(xmlobj, saveroot=True):
     Returns:
         An ElementDict object or ElementList for multiple objects
     """
-    if isinstance(xmlobj, basestring):
+    if isinstance(xmlobj, (six.text_type, six.binary_type)):
         # Allow for blank (usually HEAD) result on success
         if xmlobj.isspace():
             return {}
         try:
             element = ET.fromstring(xmlobj)
-        except Exception, err:
+        except Exception as err:
             raise Error('Unable to parse xml data: %s' % err)
     else:
         element = xmlobj
@@ -391,7 +394,7 @@ def xml_to_dict(xmlobj, saveroot=True):
                         time.strptime(element.text, '%Y-%m-%dT%H:%M:%S+0000'))
 
                 return datetime.datetime.utcfromtimestamp(timestamp)
-            except ValueError, err:
+            except ValueError as err:
                 raise Error('Unable to parse timestamp. Install dateutil'
                             ' (http://labix.org/python-dateutil) or'
                             ' pyxml (http://pyxml.sf.net/topics/)'
@@ -412,7 +415,7 @@ def xml_to_dict(xmlobj, saveroot=True):
             raise ImportError('PyYaml is not installed: http://pyyaml.org/')
         return yaml.safe_load(element.text)
     elif element_type == 'base64binary':
-        return base64.decodestring(element.text)
+        return base64.decodestring(element.text.encode('ascii'))
     elif element_type == 'file':
         content_type = element.get('content_type',
                                    'application/octet-stream')

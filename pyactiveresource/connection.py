@@ -6,8 +6,8 @@ import base64
 import logging
 import socket
 import sys
-import urllib2
-import urlparse
+import six
+from six.moves import urllib
 from pyactiveresource import formats
 
 
@@ -105,17 +105,17 @@ class MethodNotAllowed(ClientError):
     pass
 
 
-class Request(urllib2.Request):
+class Request(urllib.request.Request):
     """A request object which allows additional methods."""
 
     def __init__(self, *args, **kwargs):
         self._method = None
-        urllib2.Request.__init__(self, *args, **kwargs)
+        urllib.request.Request.__init__(self, *args, **kwargs)
 
     def get_method(self):
         """Return the HTTP method."""
         if not self._method:
-            return urllib2.Request.get_method(self)
+            return urllib.request.Request.get_method(self)
         return self._method
 
     def set_method(self, method):
@@ -124,7 +124,7 @@ class Request(urllib2.Request):
 
 
 def _urllib_has_timeout():
-  """Determines if our version of urllib2.urlopen has a timeout argument."""
+  """Determines if our version of urllib.request.urlopen has a timeout argument."""
   # NOTE: This is a terrible hack, but there's no other indication that this
   #     argument was added to the function.
   version = sys.version_info
@@ -201,12 +201,14 @@ class Connection(object):
             format: format object for en/decoding resource data.
         """
 
+        if site is None:
+            raise ValueError("Connection site argument requires site")
         self.site, self.user, self.password = self._parse_site(site)
         self.user = user or self.user or ''
         self.password = password or self.password or ''
 
         if self.user or self.password:
-            self.auth = base64.b64encode('%s:%s' % (self.user, self.password))
+            self.auth = base64.b64encode(('%s:%s' % (self.user, self.password)).encode('utf-8')).decode('utf-8')
         else:
             self.auth = None
         self.timeout = timeout
@@ -221,15 +223,14 @@ class Connection(object):
         Returns:
             A tuple containing (site, username, password).
         """
-        proto, host, path, query, fragment = urlparse.urlsplit(site)
-        auth_info, host = urllib2.splituser(host)
-        if not auth_info:
-            user, password = None, None
-        else:
-            user, password = urllib2.splitpasswd(auth_info)
+        parts = urllib.parse.urlparse(site)
 
-        new_site = urlparse.urlunparse((proto, host, '', '', '', ''))
-        return (new_site, user, password)
+        host = parts.hostname
+        if parts.port:
+            host += ":" + str(parts.port)
+
+        new_site = urllib.parse.urlunparse((parts.scheme, host, '', '', '', ''))
+        return (new_site, parts.username, parts.password)
 
     def _request(self, url):
         """Return a new request object.
@@ -252,24 +253,24 @@ class Connection(object):
         Returns:
              A Response object.
         """
-        url = urlparse.urljoin(self.site, path)
+        url = urllib.parse.urljoin(self.site, path)
         self.log.info('%s %s', method, url)
         request = self._request(url)
         request.set_method(method)
         if headers:
-            for key, value in headers.iteritems():
+            for key, value in six.iteritems(headers):
                 request.add_header(key, value)
         if self.auth:
             # Insert basic authentication header
-            request.add_header('Authorization', 'Basic %s' % self.auth)
+            request.add_header('Authorization', 'Basic ' + self.auth)
         if request.headers:
             header_string = '\n'.join([':'.join((k, v)) for k, v in
-                                       request.headers.iteritems()])
+                                       six.iteritems(request.headers)])
             self.log.debug('request-headers:%s', header_string)
         if data:
             request.add_header('Content-Type', self.format.mime_type)
-            request.add_data(data)
-            self.log.debug('request-body:%s', request.get_data())
+            request.data = data
+            self.log.debug('request-body:%s', request.data)
         elif method in ['POST', 'PUT']:
           # Some web servers need a content length on all POST/PUT operations
           request.add_header('Content-Type', self.format.mime_type)
@@ -283,9 +284,9 @@ class Connection(object):
             http_response = None
             try:
                 http_response = self._handle_error(self._urlopen(request))
-            except urllib2.HTTPError, err:
+            except urllib.error.HTTPError as err:
                 http_response = self._handle_error(err)
-            except urllib2.URLError, err:
+            except urllib.error.URLError as err:
                 raise Error(err, url)
             response = Response.from_httpresponse(http_response)
             self.log.debug('Response(code=%d, headers=%s, msg="%s")',
@@ -301,20 +302,20 @@ class Connection(object):
         return response
 
     def _urlopen(self, request):
-        """Wrap calls to urllib2 so they can be overriden.
+        """Wrap calls to urllib so they can be overriden.
 
         Args:
             request: A Request object.
         Returns:
             An httplib.HTTPResponse object.
         Raises:
-            urllib2.HTTPError on server errors.
-            urllib2.URLError on IO errors.
+            urllib.error.HTTPError on server errors.
+            urllib.error.URLError on IO errors.
         """
         if _urllib_has_timeout():
-          return urllib2.urlopen(request, timeout=self.timeout)
+          return urllib.request.urlopen(request, timeout=self.timeout)
         else:
-          return urllib2.urlopen(request)
+          return urllib.request.urlopen(request)
 
     def get(self, path, headers=None):
         """Perform an HTTP get request.
@@ -377,7 +378,7 @@ class Connection(object):
         """Handle an HTTP error.
 
         Args:
-            err: A urllib2.HTTPError object.
+            err: A urllib.error.HTTPError object.
         Returns:
             An HTTP response object if the error is recoverable.
         Raises:

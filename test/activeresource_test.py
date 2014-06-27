@@ -7,7 +7,8 @@ __author__ = 'Mark Roach (mrroach@google.com)'
 
 import unittest
 import pickle
-import urllib
+import six
+from six.moves import urllib
 from pyactiveresource import activeresource
 from pyactiveresource import connection
 from pyactiveresource import formats
@@ -42,12 +43,12 @@ class ActiveResourceTest(unittest.TestCase):
         self.json_headers = {'Content-type': 'application/json'}
 
         self.matz  = util.to_json(
-                {'id': 1, 'name': 'Matz'}, root='person')
+                {'id': 1, 'name': 'Matz'}, root='person').encode('utf-8')
         self.matz_deep  = util.to_json(
                 {'id': 1, 'name': 'Matz', 'other': 'other'},
-                root='person')
+                root='person').encode('utf-8')
         self.matz_array = util.to_json(
-                [{'id': 1, 'name': 'Matz'}], root='people')
+                [{'id': 1, 'name': 'Matz'}], root='people').encode('utf-8')
         self.ryan = util.to_json(
                 {'name': 'Ryan'}, root='person')
         self.addy = util.to_json(
@@ -169,11 +170,12 @@ class ActiveResourceTest(unittest.TestCase):
         self.http.respond_to(
             'GET', '/people.json?employee_id=12345', {},
             util.to_json([self.arnold], root='people'))
-        arnold = self.person.find_first(employee_id=12345L)
-        self.assertEqual(self.arnold, arnold.attributes)
+        for int_type in six.integer_types:
+            arnold = self.person.find_first(employee_id=int_type(12345))
+            self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_should_handle_array_query_args(self):
-        query = urllib.urlencode({'vars[]': ['a', 'b', 'c']}, True)
+        query = urllib.parse.urlencode({'vars[]': ['a', 'b', 'c']}, True)
         self.http.respond_to(
             'GET', '/people.json?%s' % query, {},
             util.to_json([self.arnold], root='people'))
@@ -181,7 +183,7 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_should_handle_dictionary_query_args(self):
-        query = urllib.urlencode({'vars[key]': 'val'}, True)
+        query = urllib.parse.urlencode({'vars[key]': 'val'}, True)
         self.http.respond_to(
             'GET', '/people.json?%s' % query, {},
             util.to_json([self.arnold], root='people'))
@@ -189,7 +191,7 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_should_handle_dictionary_query_args_with_array_value(self):
-        query = urllib.urlencode({'vars[key][]': ['val1', 'val2']}, True)
+        query = urllib.parse.urlencode({'vars[key][]': ['val1', 'val2']}, True)
         self.http.respond_to(
             'GET', '/people.json?%s' % query, {},
             util.to_json([self.arnold], root='people'))
@@ -277,7 +279,7 @@ class ActiveResourceTest(unittest.TestCase):
 
     def test_save_with_errors(self):
         self.http.respond_to('POST', '/stores.json', self.json_headers,
-                '''{"errors":{"name":["already exists"]}}''', 422)
+                b'''{"errors":{"name":["already exists"]}}''', 422)
         self.store.format = formats.JSONFormat
         store = self.store(self.store_new)
         self.assertEqual(False, store.save())
@@ -301,32 +303,32 @@ class ActiveResourceTest(unittest.TestCase):
 
     def test_class_post(self):
         self.http.respond_to('POST', '/people/hire.json?name=Matz',
-                             self.zero_length_content_headers, '')
-        self.assertEqual(connection.Response(200, ''),
+                             self.zero_length_content_headers, b'')
+        self.assertEqual(connection.Response(200, b''),
                          self.person.post('hire', name='Matz'))
 
     def test_class_put(self):
         self.http.respond_to('PUT', '/people/promote.json?name=Matz',
-                             self.json_headers, '')
-        self.assertEqual(connection.Response(200, ''),
-                         self.person.put('promote', 'atestbody', name='Matz'))
+                             self.json_headers, b'')
+        self.assertEqual(connection.Response(200, b''),
+                         self.person.put('promote', b'atestbody', name='Matz'))
 
     def test_class_put_nested(self):
         self.http.respond_to('PUT', '/people/1/addresses/sort.json?by=name',
-                             self.zero_length_content_headers, '')
-        self.assertEqual(connection.Response(200, ''),
+                             self.zero_length_content_headers, b'')
+        self.assertEqual(connection.Response(200, b''),
                          self.address.put('sort', person_id=1, by='name'))
 
     def test_class_delete(self):
         self.http.respond_to('DELETE', '/people/deactivate.json?name=Matz',
-                             {}, '')
-        self.assertEqual(connection.Response(200, ''),
+                             {}, b'')
+        self.assertEqual(connection.Response(200, b''),
                          self.person.delete('deactivate', name='Matz'))
 
     def test_class_head(self):
         self.http.respond_to('HEAD', '/people/retrieve.json?name=Matz',
-                             {}, '')
-        self.assertEqual(connection.Response(200, ''),
+                             {}, b'')
+        self.assertEqual(connection.Response(200, b''),
                          self.person.head('retrieve', name='Matz'))
 
     def test_instance_get(self):
@@ -341,9 +343,9 @@ class ActiveResourceTest(unittest.TestCase):
     def test_instance_post_new(self):
         ryan = self.person({'name': 'Ryan'})
         self.http.respond_to('POST', '/people/new/register.json',
-                             self.json_headers, '')
+                             self.json_headers, b'')
         self.assertEqual(
-            connection.Response(200, ''), ryan.post('register'))
+            connection.Response(200, b''), ryan.post('register'))
 
     def test_instance_post(self):
         self.http.respond_to('POST', '/people/1/register.json',
@@ -356,20 +358,20 @@ class ActiveResourceTest(unittest.TestCase):
         self.http.respond_to('GET', '/people/1.json', {}, self.matz)
         self.http.respond_to(
             'PUT', '/people/1/promote.json?position=Manager',
-            self.json_headers, '')
+            self.json_headers, b'')
         self.assertEqual(
-            connection.Response(200, ''),
-            self.person.find(1).put('promote', 'body', position='Manager'))
+            connection.Response(200, b''),
+            self.person.find(1).put('promote', b'body', position='Manager'))
 
     def test_instance_put_nested(self):
         self.http.respond_to(
             'GET', '/people/1/addresses/1.json', {}, self.addy)
         self.http.respond_to(
             'PUT', '/people/1/addresses/1/normalize_phone.json?locale=US',
-            self.zero_length_content_headers, '', 204)
+            self.zero_length_content_headers, b'', 204)
 
         self.assertEqual(
-            connection.Response(204, ''),
+            connection.Response(204, b''),
             self.address.find(1, person_id=1).put('normalize_phone',
                                                   locale='US'))
 
@@ -384,8 +386,8 @@ class ActiveResourceTest(unittest.TestCase):
 
     def test_instance_delete(self):
         self.http.respond_to('GET', '/people/1.json', {}, self.matz)
-        self.http.respond_to('DELETE', '/people/1/deactivate.json', {}, '')
-        self.assertEqual('', self.person.find(1).delete('deactivate').body)
+        self.http.respond_to('DELETE', '/people/1/deactivate.json', {}, b'')
+        self.assertEqual(b'', self.person.find(1).delete('deactivate').body)
 
     def test_instance_head(self):
         self.http.respond_to('HEAD', '/people/1.json', {}, self.matz)
@@ -394,7 +396,7 @@ class ActiveResourceTest(unittest.TestCase):
     def test_save_should_get_id_from_location(self):
         self.http.respond_to(
             'POST', '/people.json', self.json_headers,
-            '', 200, {'Location': '/people/7.json'})
+            b'', 200, {'Location': '/people/7.json'})
         person = self.person.create({})
         self.assertEqual(7, person.id)
 
@@ -404,7 +406,7 @@ class ActiveResourceTest(unittest.TestCase):
         # all lowercase)
         self.http.respond_to(
             'POST', '/people.json', self.json_headers,
-            '', 200, {'location': '/people/7.json'})
+            b'', 200, {'location': '/people/7.json'})
         person = self.person.create({})
         self.assertEqual(7, person.id)
 
@@ -565,7 +567,7 @@ class ActiveResourceTest(unittest.TestCase):
         res = activeresource.ActiveResource()
         res.children = children
         json = res.to_json()
-        parsed = util.json_to_dict(json)
+        parsed = util.json_to_dict(json.decode('utf-8'))
         self.assertEqual(children, parsed['active_resource']['children'])
 
     def test_to_xml_should_handle_attributes_containing_lists_of_strings(self):
@@ -579,13 +581,13 @@ class ActiveResourceTest(unittest.TestCase):
         store = self.store({'name': 'foo', 'id': 1})
         store.websites = ['http://example.com', 'http://store.example.com']
         json = store.to_json()
-        parsed = util.json_to_dict(json)
+        parsed = util.json_to_dict(json.decode('utf-8'))
         self.assertEqual(['http://example.com', 'http://store.example.com'], parsed['store']['websites'])
 
     def test_to_xml_should_handle_dasherize_option(self):
         res = activeresource.ActiveResource({'attr_name': 'value'})
         xml = res.to_xml(dasherize=False)
-        self.assert_('<attr_name>value</attr_name>' in xml)
+        self.assert_(b'<attr_name>value</attr_name>' in xml)
 
     def test_same_attributes_should_share_the_same_hash(self):
         a = self.person({'name': 'foo', 'id': 1})

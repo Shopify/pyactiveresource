@@ -7,8 +7,8 @@ __author__ = 'Mark Roach (mrroach@google.com)'
 
 
 import unittest
-import urllib2
-from StringIO import StringIO
+from six import BytesIO
+from six.moves import urllib
 from pyactiveresource import connection
 from pyactiveresource import util
 from pyactiveresource import formats
@@ -43,7 +43,7 @@ class ConnectionTest(unittest.TestCase):
         self.connection = connection.Connection(self.http.site)
     
     def assert_response_raises(self, error, code):
-        response = urllib2.HTTPError('', code, '', {}, StringIO(''))
+        response = urllib.error.HTTPError('', code, '', {}, BytesIO(b''))
         self.http.set_response(response)
         self.assertRaises(error, self.connection._open, '', '')
       
@@ -57,7 +57,7 @@ class ConnectionTest(unittest.TestCase):
             response = http_fake.FakeResponse(code, str(code))
             self.http.set_response(response)
             self.assertEquals(self.connection._open('', ''),
-                              connection.Response(code, str(code)))
+                              connection.Response(code, str(code).encode('utf-8')))
 
     def test_handle_unauthorized_access(self):
         # 401 is an unauthorized request

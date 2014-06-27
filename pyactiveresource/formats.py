@@ -9,7 +9,7 @@ from pyactiveresource import util
 
 def remove_root(data):
     if isinstance(data, dict) and len(data) == 1:
-        return data.values()[0]
+        return next(iter(data.values()))
     return data
 
 class Error(Exception):
@@ -33,7 +33,7 @@ class XMLFormat(Base):
         log.debug('decoding resource: %s', resource_string)
         try:
             data = util.xml_to_dict(resource_string, saveroot=False)
-        except util.Error, err:
+        except util.Error as err:
             raise Error(err)
         return remove_root(data)
 
@@ -49,8 +49,8 @@ class JSONFormat(Base):
         log = logging.getLogger('pyactiveresource.format')
         log.debug('decoding resource: %s', resource_string)
         try:
-            data = util.json_to_dict(resource_string)
-        except ValueError, err:
+            data = util.json_to_dict(resource_string.decode('utf-8'))
+        except ValueError as err:
             raise Error(err)
         return remove_root(data)
 
@@ -59,4 +59,4 @@ class JSONFormat(Base):
         """Convert a dictionary to a resource string."""
         log = logging.getLogger('pyactiveresource.format')
         log.debug('encoding resource: %r', data)
-        return util.to_json(data)
+        return util.to_json(data).encode('utf-8')
