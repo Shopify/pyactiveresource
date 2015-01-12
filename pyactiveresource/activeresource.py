@@ -738,7 +738,12 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         template = Template(path)
         keys = cls._prefix_parameters()
         options = dict([(k, options.get(k, '')) for k in keys])
-        return template.safe_substitute(options)
+        prefix = template.safe_substitute(options)
+
+        prefix = re.sub(r'/+', '/', prefix)
+        if prefix.endswith('/'):
+            prefix = prefix[:-1]
+        return prefix
 
     # Public instance methods
     def to_dict(self):
