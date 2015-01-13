@@ -734,8 +734,7 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         """
         if options is None:
             options = {}
-        path = re.sub('/$', '', cls.prefix_source)
-        template = Template(path)
+        template = Template(cls.prefix_source)
         keys = cls._prefix_parameters()
         options = dict([(k, options.get(k, '')) for k in keys])
         prefix = template.safe_substitute(options)

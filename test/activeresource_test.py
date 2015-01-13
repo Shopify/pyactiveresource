@@ -238,7 +238,7 @@ class ActiveResourceTest(unittest.TestCase):
         self.http.respond_to(
             'GET', '/people.json?name=Ralph', {},
             util.to_json([], root='people'))
-        self.person.prefix_source = '/${store_type}/${store_id}/'
+        self.person.prefix_source = '/${store_id}/'
         nobody = self.person.find(name='Ralph')
         self.assertEqual([], nobody)
 
