@@ -61,6 +61,10 @@ class TestHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHandler):
     request = None
     site = ''
 
+    def __init__(self, debuglevel=0, context=None):
+        self._debuglevel = debuglevel
+        self._context = context
+
     @classmethod
     def set_response(cls, response):
         """Set a static response to be returned for all requests.
