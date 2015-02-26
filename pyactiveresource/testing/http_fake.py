@@ -61,9 +61,10 @@ class TestHandler(urllib.request.HTTPHandler, urllib.request.HTTPSHandler):
     request = None
     site = ''
 
-    def __init__(self, debuglevel=0, context=None):
+    def __init__(self, debuglevel=0, **kwargs):
         self._debuglevel = debuglevel
-        self._context = context
+        self._context = kwargs.get('context')
+        self._check_hostname = kwargs.get('check_hostname')
 
     @classmethod
     def set_response(cls, response):
