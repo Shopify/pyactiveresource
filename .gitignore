@@ -6,3 +6,4 @@
 tags
 /pyactiveresource.egg-info/
 *.egg
+.idea
