@@ -398,6 +398,8 @@ class UtilTest(unittest.TestCase):
             "TestCamel": "TestCamel",
             "test camel": "TestCamel",
             "test camel case": "TestCamelCase",
+            " test camel": "TestCamel",
+            "test camel ": "TestCamel",
             }
         for noncamel_input, expected in input_expected.items():
             result = util.camelize(noncamel_input)
