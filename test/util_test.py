@@ -392,6 +392,21 @@ class UtilTest(unittest.TestCase):
         xml = util.to_xml({'title': 'Test'}, root='product')
         self.assert_(b'product' in xml)
 
+    def test_camelize(self):
+        input_expected = {
+            "test": "Test",
+            "TestCamel": "TestCamel",
+            "test camel": "TestCamel",
+            "test camel case": "TestCamelCase",
+            " test camel": "TestCamel",
+            "test camel ": "TestCamel",
+            "test  camel ": "TestCamel",
+            "+test camel ": "TestCamel",
+            }
+        for noncamel_input, expected in input_expected.items():
+            result = util.camelize(noncamel_input)
+            self.assertEquals(result, expected)
+
 
 if __name__ == '__main__':
     unittest.main()

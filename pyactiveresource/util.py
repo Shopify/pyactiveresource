@@ -196,7 +196,7 @@ def camelize(word):
         The modified string.
     """
     return ''.join(w[0].upper() + w[1:]
-                   for w in re.sub('[^A-Z^a-z^0-9^:]+', ' ', word).split(' '))
+                   for w in re.sub('[^A-Z^a-z^0-9^:]+', ' ', word).strip().split(' '))
 
 
 def underscore(word):
