@@ -1,7 +1,7 @@
 from setuptools import setup
 import sys
 
-version = '2.1.1'
+version = '2.1.2'
 
 if sys.version_info >= (3,):
     python_dateutils_version = 'python-dateutil>=2.0'
