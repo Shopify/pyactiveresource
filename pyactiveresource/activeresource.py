@@ -458,8 +458,10 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         Returns:
             The updated resource (which may or may not have been updated successfully).
         """
-        resource = cls({"id": id_})
-        resource.save(attributes)
+        attrs = {"id": id_}
+        attrs.update(attributes)
+        resource = cls(attrs)
+        resource.save(attrs)
         return resource
 
     # Non-public class methods to support the above
