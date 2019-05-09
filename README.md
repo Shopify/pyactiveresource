@@ -159,7 +159,7 @@ tyler.first = 'Tyson'
 tyler.save()  # true
 ```
 
-Delete
+Delete (Destroy)
 -----
 Destruction of a resource can be invoked as a class and instance method of the resource.
 ```
@@ -170,7 +170,7 @@ Destruction of a resource can be invoked as a class and instance method of the r
 # for both of these forms.  An empty response with
 # is expected with response code (200)
 #
-tyler.delete()
+tyler.destroy()
 ```
 
 Running Tests
