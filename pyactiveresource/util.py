@@ -62,7 +62,7 @@ PLURALIZE_PATTERNS = [
     (r'(matr|vert|ind)(?:ix|ex)$', r'\1ices'),
     (r'(x|ch|ss|sh)$', r'\1es'),
     (r'([^aeiouy]|qu)y$', r'\1ies'),
-    (r'(hive)$', r'1s'),
+    (r'(hive)$', r'\1s'),
     (r'(?:([^f])fe|([lr])f)$', r'\1\2ves'),
     (r'sis$', r'ses'),
     (r'([ti])um$', r'\1a'),
