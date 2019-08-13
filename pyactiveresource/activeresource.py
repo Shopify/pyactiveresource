@@ -12,6 +12,7 @@ from pyactiveresource import connection
 from pyactiveresource import element_containers
 from pyactiveresource import formats
 from pyactiveresource import util
+from pyactiveresource.collection import Collection
 
 
 VALID_NAME = re.compile('[a-z_]\w*')  # Valid python attribute names
@@ -518,10 +519,10 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
             path = from_ + cls._query_string(query_options)
             prefix_options = None
         else:
-
             path = cls._collection_path(prefix_options, query_options)
-        return cls._build_list(cls.connection.get(path, cls.headers),
-                               prefix_options)
+
+        return cls._build_collection(cls.connection.get(path, cls.headers),
+                                     prefix_options, query_options)
 
     @classmethod
     def _build_object(cls, attributes, prefix_options=None):
@@ -537,19 +538,19 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         return cls(attributes, prefix_options)
 
     @classmethod
-    def _build_list(cls, elements, prefix_options=None):
-        """Create a list of objects for the given xml string.
+    def _build_collection(cls, elements, prefix_options=None, query_options={}):
+        """Create a collection of objects for the given xml string.
 
         Args:
             elements: A list of dictionaries representing resources.
             prefix_options: A dict of prefixes to add to the request for
                             nested URLs.
         Returns:
-            A list of ActiveResource objects.
+            A collection of ActiveResource objects.
         """
-        resources = []
+        resources = Collection(elements)
         if isinstance(elements, dict):
-          elements = [elements]
+          elements = Collection()[elements]
         # slice elements to ensure that this is a list-type object not a dict
         for element in elements[:]:
             resources.append(cls(element, prefix_options))
