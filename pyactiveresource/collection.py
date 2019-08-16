@@ -4,6 +4,9 @@ class Collection(list):
     self.original_params = original_params
     super(list)
 
+  def __repr__(self):
+    return repr(self.elements)
+
   @property
   def original_params(self):
     return self._original_params
