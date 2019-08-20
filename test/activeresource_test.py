@@ -14,6 +14,7 @@ from pyactiveresource import connection
 from pyactiveresource import formats
 from pyactiveresource import util
 from pyactiveresource.testing import http_fake
+from pyactiveresource.collection import Collection
 
 
 class Error(Exception):
@@ -84,20 +85,20 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(self.soup, soup.attributes)
 
     def test_find(self):
-        # Return a list of people for a find method call
+        # Return a collection of people for a find method call
         self.http.respond_to(
             'GET', '/people.json', {},
-            util.to_json([self.arnold, self.eb], root='people'))
+            util.to_json(Collection([self.arnold, self.eb]).to_list(), root='people'))
 
         people = self.person.find()
         self.assertEqual([self.arnold, self.eb],
                          [p.attributes for p in people])
 
     def test_find_with_xml_format(self):
-        # Return a list of people for a find method call
+        # Return a collection of people for a find method call
         self.http.respond_to(
             'GET', '/people.xml', {},
-            util.to_xml([self.arnold, self.eb], root='people'))
+            util.to_xml(Collection([self.arnold, self.eb]).to_list(), root='people'))
 
         self.person.format = formats.XMLFormat
         people = self.person.find()
@@ -144,10 +145,10 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_with_query_options(self):
-        # Return a single-item people list for a find() call with kwargs
+        # Return a single-item people collection for a find() call with kwargs
         self.http.respond_to(
             'GET', '/people.json?name=Arnold', {},
-            util.to_json([self.arnold], root='people'))
+            util.to_json(Collection([self.arnold]).to_list(), root='people'))
         # Query options only
         arnold = self.person.find(name='Arnold')[0]
         self.assertEqual(self.arnold, arnold.attributes)
@@ -155,21 +156,21 @@ class ActiveResourceTest(unittest.TestCase):
     def test_find_should_handle_unicode_query_args(self):
         self.http.respond_to(
             'GET', '/people.json?name=%C3%83%C3%A9', {},
-            util.to_json([self.arnold], root='people'))
+            util.to_json(Collection([self.arnold]).to_list(), root='people'))
         arnold = self.person.find_first(name=u'\xc3\xe9')
         self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_should_handle_integer_query_args(self):
         self.http.respond_to(
             'GET', '/people.json?employee_id=12345', {},
-            util.to_json([self.arnold], root='people'))
+            util.to_json(Collection([self.arnold]).to_list(), root='people'))
         arnold = self.person.find_first(employee_id=12345)
         self.assertEqual(self.arnold, arnold.attributes)
 
     def test_find_should_handle_long_query_args(self):
         self.http.respond_to(
             'GET', '/people.json?employee_id=12345', {},
-            util.to_json([self.arnold], root='people'))
+            util.to_json(Collection([self.arnold]).to_list(), root='people'))
         for int_type in six.integer_types:
             arnold = self.person.find_first(employee_id=int_type(12345))
             self.assertEqual(self.arnold, arnold.attributes)
@@ -178,7 +179,7 @@ class ActiveResourceTest(unittest.TestCase):
         query = urllib.parse.urlencode({'vars[]': ['a', 'b', 'c']}, True)
         self.http.respond_to(
             'GET', '/people.json?%s' % query, {},
-            util.to_json([self.arnold], root='people'))
+            util.to_json(Collection([self.arnold]).to_list(), root='people'))
         arnold = self.person.find_first(vars=['a', 'b', 'c'])
         self.assertEqual(self.arnold, arnold.attributes)
 
@@ -186,7 +187,7 @@ class ActiveResourceTest(unittest.TestCase):
         query = urllib.parse.urlencode({'vars[key]': 'val'}, True)
         self.http.respond_to(
             'GET', '/people.json?%s' % query, {},
-            util.to_json([self.arnold], root='people'))
+            util.to_json(Collection([self.arnold]).to_list(), root='people'))
         arnold = self.person.find_first(vars={'key': 'val'})
         self.assertEqual(self.arnold, arnold.attributes)
 
@@ -306,7 +307,7 @@ class ActiveResourceTest(unittest.TestCase):
     def test_class_get(self):
         self.http.respond_to('GET', '/people/retrieve.json?name=Matz',
                              {}, self.matz_array)
-        self.assertEqual([{'id': 1, 'name': 'Matz'}],
+        self.assertEqual(Collection([{'id': 1, 'name': 'Matz'}]).to_list(),
                          self.person.get('retrieve', name='Matz' ))
 
     def test_class_post(self):
@@ -557,13 +558,13 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(res, unpickled)
 
     def test_to_dict_should_handle_attributes_containing_lists_of_dicts(self):
-        children = [{'name': 'child1'}, {'name': 'child2'}]
+        children = Collection([{'name': 'child1'}, {'name': 'child2'}])
         res = activeresource.ActiveResource()
         res.children = children
         self.assertEqual(children, res.to_dict()['children'])
 
     def test_to_xml_should_handle_attributes_containing_lists_of_dicts(self):
-        children = [{'name': 'child1'}, {'name': 'child2'}]
+        children = Collection([{'name': 'child1'}, {'name': 'child2'}])
         res = activeresource.ActiveResource()
         res.children = children
         xml = res.to_xml()
@@ -571,7 +572,7 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(children, parsed['children'])
 
     def test_to_json_should_handle_attributes_containing_lists_of_dicts(self):
-        children = [{'name': 'child1'}, {'name': 'child2'}]
+        children = Collection([{'name': 'child1'}, {'name': 'child2'}])
         res = activeresource.ActiveResource()
         res.children = children
         json = res.to_json()
