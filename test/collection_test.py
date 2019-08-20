@@ -7,12 +7,6 @@ __author__ = 'Alex Richter (alex.richter@shopify.com)'
 
 
 import unittest
-# from six import BytesIO
-# from six.moves import urllib
-# from pyactiveresource import connection
-# from pyactiveresource import util
-# from pyactiveresource import formats
-# from pyactiveresource.testing import http_fake
 from pyactiveresource.collection import Collection
 
 class CollectionTest(unittest.TestCase):
