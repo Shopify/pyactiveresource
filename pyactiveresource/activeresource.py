@@ -12,6 +12,7 @@ from pyactiveresource import connection
 from pyactiveresource import element_containers
 from pyactiveresource import formats
 from pyactiveresource import util
+from pyactiveresource.collection import Collection
 
 
 VALID_NAME = re.compile('[a-z_]\w*')  # Valid python attribute names
@@ -520,12 +521,14 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         else:
 
             path = cls._collection_path(prefix_options, query_options)
-        return cls._build_list(cls.connection.get(path, cls.headers),
-                               prefix_options)
+
+        response = cls.connection.get(path, cls.headers)
+        objs = cls.format.decode(response.body)
+        return cls._build_collection(objs, prefix_options, response.headers)
 
     @classmethod
     def _build_object(cls, attributes, prefix_options=None):
-        """Create an object or objects for the given resource string.
+        """Create an object or objects from the given resource.
 
         Args:
             attributes: A dictionary representing a resource.
@@ -537,23 +540,35 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         return cls(attributes, prefix_options)
 
     @classmethod
-    def _build_list(cls, elements, prefix_options=None):
-        """Create a list of objects for the given xml string.
+    def _build_collection(cls, elements, prefix_options=None, headers={}):
+        """Create a Collection of objects from the given resources.
 
         Args:
             elements: A list of dictionaries representing resources.
             prefix_options: A dict of prefixes to add to the request for
                             nested URLs.
+            headers: The response headers that came with the resources.
         Returns:
-            A list of ActiveResource objects.
+            A Collection of ActiveResource objects.
         """
-        resources = []
+
         if isinstance(elements, dict):
-          elements = [elements]
-        # slice elements to ensure that this is a list-type object not a dict
-        for element in elements[:]:
-            resources.append(cls(element, prefix_options))
-        return resources
+            # FIXME(emdemir): this is not an ActiveResource object but is
+            # preserved for backwards compatibility. What should this be
+            # instead?
+            elements = [elements]
+        else:
+            elements = (
+                cls._build_object(el, prefix_options) for el in elements
+            )
+
+        # TODO(emdemir): Figure out whether passing all headers is needed.
+        # I am currently assuming that the Link header is not standard
+        # ActiveResource stuff so I am passing all headers up the chain to
+        # python_shopify_api which will handle pagination.
+        return Collection(elements, metadata={
+            "headers": headers
+        })
 
     @classmethod
     def _query_string(cls, query_options):

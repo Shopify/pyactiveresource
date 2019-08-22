@@ -284,7 +284,7 @@ def serialize(value, element):
 
 
 def to_json(obj, root='object'):
-    """Convert a dictionary or list to an JSON string.
+    """Convert a dictionary, list or Collection to an JSON string.
 
     Args:
         obj: The object to serialize.
