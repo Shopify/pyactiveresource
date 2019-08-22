@@ -53,3 +53,9 @@ class CollectionTest(unittest.TestCase):
 
         self.assertEqual(self.collection, a,
                          "Iterator constructor didn't create proper Collection")
+
+    def test_collection_list_equality(self):
+        l = [1, 2, 3]
+
+        self.assertEqual(self.collection, l,
+                         "Collection isn't equal to list with same contents")
