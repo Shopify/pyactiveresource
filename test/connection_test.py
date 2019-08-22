@@ -110,7 +110,7 @@ class ConnectionTest(unittest.TestCase):
         self.http.respond_to(
             'GET', '/people/1.json', {}, person)
         self.connection.format = formats.JSONFormat
-        response = self.connection.get('/people/1.json')
+        response = self.connection.get_formatted('/people/1.json')
         self.assertEqual(response['name'], 'Matz')
 
     def test_get_with_xml_format(self):
@@ -118,7 +118,7 @@ class ConnectionTest(unittest.TestCase):
         self.http.respond_to(
             'GET', '/people/1.xml', {}, person)
         self.connection.format = formats.XMLFormat
-        response = self.connection.get('/people/1.xml')
+        response = self.connection.get_formatted('/people/1.xml')
         self.assertEqual(response['name'], 'Matz')
 
     def test_head(self):
@@ -128,25 +128,25 @@ class ConnectionTest(unittest.TestCase):
     def test_get_with_header(self):
         self.http.respond_to(
             'GET', '/people/2.json', self.header, self.david)
-        david = self.connection.get('/people/2.json', self.header)
+        david = self.connection.get_formatted('/people/2.json', self.header)
         self.assertEqual(david['name'], 'David')
   
     def test_get_collection(self):
         self.http.respond_to('GET', '/people.json', {}, self.people)
-        people = self.connection.get('/people.json')
+        people = self.connection.get_formatted('/people.json')
         self.assertEqual('Matz', people[0]['name'])
         self.assertEqual('David', people[1]['name'])
     
     def test_get_collection_single(self):
         self.http.respond_to('GET', '/people_single_elements.json', {},
                              self.people_single)
-        people = self.connection.get('/people_single_elements.json')
+        people = self.connection.get_formatted('/people_single_elements.json')
         self.assertEqual('Matz', people[0]['name'])
     
     def test_get_collection_empty(self):
         self.http.respond_to('GET', '/people_empty_elements.json', {},
                              self.people_empty)
-        people = self.connection.get('/people_empty_elements.json')
+        people = self.connection.get_formatted('/people_empty_elements.json')
         self.assertEqual([], people)
 
     def test_post(self):

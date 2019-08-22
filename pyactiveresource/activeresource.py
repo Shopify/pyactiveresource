@@ -483,7 +483,7 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         """
         prefix_options, query_options = cls._split_options(kwargs)
         path = cls._element_path(id_, prefix_options, query_options)
-        return cls._build_object(cls.connection.get(path, cls.headers),
+        return cls._build_object(cls.connection.get_formatted(path, cls.headers),
                                  prefix_options)
 
     @classmethod
@@ -500,7 +500,7 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         """
         #TODO(mrroach): allow from_ to be a string-generating function
         path = from_ + cls._query_string(query_options)
-        return cls._build_object(cls.connection.get(path, cls.headers))
+        return cls._build_object(cls.connection.get_formatted(path, cls.headers))
 
     @classmethod
     def _find_every(cls, from_=None, **kwargs):
@@ -646,7 +646,7 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
             A dictionary representing the returned data.
         """
         url = cls._custom_method_collection_url(method_name, kwargs)
-        return cls.connection.get(url, cls.headers)
+        return cls.connection.get_formatted(url, cls.headers)
 
     @classmethod
     def _class_post(cls, method_name, body=b'', **kwargs):
@@ -794,7 +794,7 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         Returns:
             None
         """
-        attributes = self.klass.connection.get(
+        attributes = self.klass.connection.get_formatted(
                 self._element_path(self.id, self._prefix_options),
                 self.klass.headers)
         self._update(attributes)
@@ -1081,7 +1081,7 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
             A dictionary representing the returned data.
         """
         url = self._custom_method_element_url(method_name, kwargs)
-        return self.klass.connection.get(url, self.klass.headers)
+        return self.klass.connection.get_formatted(url, self.klass.headers)
 
     def _instance_post(self, method_name, body=b'', **kwargs):
         """Create a new resource/nested resource.
