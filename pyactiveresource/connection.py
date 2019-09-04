@@ -190,7 +190,7 @@ class Connection(object):
 
     def __init__(self, site, user=None, password=None, timeout=None,
                  format=formats.JSONFormat):
-    
+
         """Initialize a new Connection object.
 
         Args:
@@ -324,9 +324,20 @@ class Connection(object):
             path: The HTTP path to retrieve.
             headers: A dictionary of HTTP headers to add.
         Returns:
-            A dictionary representing a resource.
+            A Response object.
         """
-        return self.format.decode(self._open('GET', path, headers=headers).body)
+        return self._open('GET', path, headers=headers)
+
+    def get_formatted(self, path, headers=None):
+        """Perform an HTTP get request and return the formatted response.
+
+        Args:
+            path: The HTTP path to retrieve.
+            headers: A dictionary of HTTP headers to add.
+        Returns:
+            The resource as a dict.
+        """
+        return self.format.decode(self.get(path, headers).body)
 
     def delete(self, path, headers=None):
         """Perform an HTTP delete request.
