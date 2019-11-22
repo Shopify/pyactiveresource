@@ -8,7 +8,7 @@ import socket
 import sys
 import six
 import backoff
-from six.moves import urllib
+from six.moves import urllib, http_client
 from pyactiveresource import formats
 
 
@@ -318,7 +318,7 @@ class Connection(object):
         else:
           return urllib.request.urlopen(request)
 
-    @backoff.on_exception(backoff.expo, ServerError)
+    @backoff.on_exception(backoff.expo, (ServerError, http_client.IncompleteRead))
     def get(self, path, headers=None):
         """Perform an HTTP get request.
 
