@@ -1,7 +1,7 @@
 from setuptools import setup
 import sys
 
-version = '2.1.2'
+version = '2.2.0'
 
 if sys.version_info >= (3,):
     python_dateutils_version = 'python-dateutil>=2.0'
@@ -37,7 +37,7 @@ setup(name='pyactiveresource',
                    'Programming Language :: Python :: 3',
                    'Programming Language :: Python :: 3.3',
                    'Programming Language :: Python :: 3.4',
-                   'Topic :: Software Development', 
+                   'Topic :: Software Development',
                    'Topic :: Software Development :: Libraries',
                    'Topic :: Software Development :: Libraries :: Python Modules']
     )
