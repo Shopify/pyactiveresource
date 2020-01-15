@@ -1,5 +1,1 @@
 deploy:
-  override:
-    - assert-egg-version-tag setup.py
-    - python setup.py sdist
-    - twine upload -u shopify -p $PYPI_PASSWORD_SHOPIFY dist/*
