@@ -15,7 +15,7 @@ from pyactiveresource import util
 from pyactiveresource.collection import Collection
 
 
-VALID_NAME = re.compile('[a-z_]\w*')  # Valid python attribute names
+VALID_NAME = re.compile(r'[a-z_]\w*')  # Valid python attribute names
 
 
 class Error(Exception):
