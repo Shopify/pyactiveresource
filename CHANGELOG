@@ -1,2 +1,5 @@
+== Version 2.2.1
+* Fix deprecation warning regarding invalid escape sequences
+
 == Version 2.2.0
 * Add Collection class for managing paginated resources
