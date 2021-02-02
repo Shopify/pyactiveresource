@@ -370,7 +370,7 @@ def xml_to_dict(xmlobj, saveroot=True):
     if element_type == 'array':
         element_list_type = element.tag.replace('-', '_')
         return_list = element_containers.ElementList(element_list_type)
-        for child in element.getchildren():
+        for child in list(element):
             return_list.append(xml_to_dict(child, saveroot=False))
         if saveroot:
             return element_containers.ElementDict(element_list_type,
@@ -425,7 +425,7 @@ def xml_to_dict(xmlobj, saveroot=True):
         if not element.text:
             return ''
         return element.text
-    elif element.getchildren():
+    elif list(element):
         # This is an element with children. The children might be simple
         # values, or nested hashes.
         if element_type:
@@ -434,7 +434,7 @@ def xml_to_dict(xmlobj, saveroot=True):
         else:
             attributes = element_containers.ElementDict(singularize(
                 element.tag.replace('-', '_')), element.items())
-        for child in element.getchildren():
+        for child in list(element):
             attribute = xml_to_dict(child, saveroot=False)
             child_tag = child.tag.replace('-', '_')
             # Handle multiple elements with the same tag name
