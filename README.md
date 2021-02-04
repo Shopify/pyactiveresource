@@ -1,6 +1,7 @@
-PyActiveResource
+PyActiveResource 
 ================
-
+ [![Build Status](https://github.com/Shopify/pyactiveresource/workflows/CI/badge.svg?branch=master)](https://github.com/Shopify/pyactiveresource/actions)
+ 
 A python port of the [ActiveResource
 ](https://github.com/rails/activeresource) project,
 which provides an object-relational mapping for REST web services.
