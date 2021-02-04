@@ -5,6 +5,7 @@ python:
   - "2.7"
   - "3.3"
   - "3.4"
+  - "3.9"
 
 # command to install dependencies
 install: "python setup.py install"
