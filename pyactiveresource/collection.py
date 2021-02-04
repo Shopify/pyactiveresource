@@ -22,7 +22,7 @@ class Collection(list):
 
     def copy(self):
         """Override list.copy so that it returns a Collection."""
-        copied_list = super(Collection, self).copy()
+        copied_list = list(self)
         return Collection(copied_list, metadata=copy.deepcopy(self._metadata))
 
     def __eq__(self, other):
