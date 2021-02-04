@@ -1,3 +1,6 @@
+== Version 2.2.2
+* Improve python 2 and 3 compatibility 
+
 == Version 2.2.1
 * Fix deprecation warning regarding invalid escape sequences
 
