@@ -34,6 +34,7 @@ class Errors(object):
         """
         self.base = base
         self.errors = {}
+        self.code = 0
 
     @property
     def size(self):
@@ -72,6 +73,7 @@ class Errors(object):
             None
         """
         self.errors = {}
+        self.code = 0
 
     def from_array(self, messages):
         attribute_keys = self.base.attributes.keys()
@@ -845,6 +847,7 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
                 self.errors.from_xml(err.response.body)
             elif self.klass.format == formats.JSONFormat:
                 self.errors.from_json(err.response.body)
+            self.errors.code = err.code;
             return False
         try:
             attributes = self.klass.format.decode(response.body)
