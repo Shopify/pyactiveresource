@@ -20,6 +20,7 @@ setup(name='pyactiveresource',
       test_suite='test',
       install_requires=[
           'six',
+          'backoff'
       ],
       tests_require=[
           python_dateutils_version,
