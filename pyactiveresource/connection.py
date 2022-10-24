@@ -285,6 +285,9 @@ class Connection(object):
             try:
                 http_response = self._handle_error(self._urlopen(request))
             except urllib.error.HTTPError as err:
+                self.log.debug('HTTPError(code=%d, reason=%s)', err.code, err.reason)
+                if hasattr(err, "headers"):  # available since version 3.4.
+                    self.log.debug('HTTPError headers:\n%s', err.headers)
                 http_response = self._handle_error(err)
             except urllib.error.URLError as err:
                 raise Error(err, url)
