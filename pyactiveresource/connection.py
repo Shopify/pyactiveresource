@@ -3,10 +3,12 @@
 """A connection object to interface with REST services."""
 
 import base64
+import certifi
 import logging
 import socket
 import sys
 import six
+import ssl
 from six.moves import urllib
 from pyactiveresource import formats
 
@@ -313,9 +315,16 @@ class Connection(object):
             urllib.error.URLError on IO errors.
         """
         if _urllib_has_timeout():
-          return urllib.request.urlopen(request, timeout=self.timeout)
+          return urllib.request.urlopen(
+              request,
+              timeout=self.timeout,
+              context=ssl.create_default_context(cafile=certifi.where())
+          )
         else:
-          return urllib.request.urlopen(request)
+          return urllib.request.urlopen(
+              request,
+              context=ssl.create_default_context(cafile=certifi.where())
+          )
 
     def get(self, path, headers=None):
         """Perform an HTTP get request.
