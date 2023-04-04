@@ -38,7 +38,8 @@ class ActiveResourceTest(unittest.TestCase):
         self.soup = {'id': 1, 'name': 'Hot Water Soup'}
         self.store_new = {'name': 'General Store'}
         self.general_store = {'id': 1, 'name': 'General Store'}
-        self.store_update = {'manager_id': 3, 'id': 1, 'name':'General Store'}
+        self.store_update = {'manager_id': 3, 'id': 1, 'name': 'General Store'}
+        self.store_partial_update = {'manager_id': 3, 'id': 1, 'name': 'New General Store Name'}
         self.xml_headers = {'Content-type': 'application/xml'}
         self.json_headers = {'Content-type': 'application/json'}
 
@@ -251,6 +252,10 @@ class ActiveResourceTest(unittest.TestCase):
         self.http.respond_to(
             'PUT', '/stores/1.json', self.json_headers,
             util.to_json(self.store_update, root='store'))
+        # Return an object for a patch request.
+        self.http.respond_to(
+            'PATCH', '/stores/1.json', self.json_headers,
+            util.to_json(self.store_partial_update, root='store'))
 
         self.store.format = formats.JSONFormat
         store = self.store(self.store_new)
@@ -258,6 +263,10 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(self.general_store, store.attributes)
         store.manager_id = 3
         store.save()
+        self.assertEqual(self.store_update, store.attributes)
+        store.name = "New General Store Name"
+        store.save(["name"])
+        self.assertEqual(self.store_partial_update, store.attributes)
 
     def test_save_xml_format(self):
         # Return an object with id for a post(save) request.
@@ -268,6 +277,10 @@ class ActiveResourceTest(unittest.TestCase):
         self.http.respond_to(
             'PUT', '/stores/1.xml', self.xml_headers,
             util.to_xml(self.store_update, root='store'))
+        # Return an object for a patch request.
+        self.http.respond_to(
+            'PATCH', '/stores/1.xml', self.xml_headers,
+            util.to_xml(self.store_partial_update, root='store'))
 
         self.store.format = formats.XMLFormat
         store = self.store(self.store_new)
@@ -275,6 +288,10 @@ class ActiveResourceTest(unittest.TestCase):
         self.assertEqual(self.general_store, store.attributes)
         store.manager_id = 3
         store.save()
+        self.assertEqual(self.store_update, store.attributes)
+        store.name = "New General Store Name"
+        store.save(["name"])
+        self.assertEqual(self.store_partial_update, store.attributes)
 
     def test_save_should_clear_errors(self):
       self.http.respond_to(
@@ -326,6 +343,18 @@ class ActiveResourceTest(unittest.TestCase):
                              self.zero_length_content_headers, b'')
         self.assertEqual(connection.Response(200, b''),
                          self.address.put('sort', person_id=1, by='name'))
+
+    def test_class_patch(self):
+        self.http.respond_to('PATCH', '/people/partial_update.json?name=Matz',
+                             self.json_headers, b'')
+        self.assertEqual(connection.Response(200, b''),
+                         self.person.patch('partial_update', b'atestbody', name='Matz'))
+
+    def test_class_patch_nested(self):
+        self.http.respond_to('PATCH', '/people/1/addresses/sort.json?by=name',
+                             self.zero_length_content_headers, b'')
+        self.assertEqual(connection.Response(200, b''),
+                         self.address.patch('sort', person_id=1, by='name'))
 
     def test_class_delete(self):
         self.http.respond_to('DELETE', '/people/deactivate.json?name=Matz',
@@ -383,6 +412,27 @@ class ActiveResourceTest(unittest.TestCase):
             self.address.find(1, person_id=1).put('normalize_phone',
                                                   locale='US'))
 
+    def test_instance_patch(self):
+        self.http.respond_to('GET', '/people/1.json', {}, self.matz)
+        self.http.respond_to(
+            'PATCH', '/people/1/partial_update.json?position=Manager',
+            self.json_headers, b'')
+        self.assertEqual(
+            connection.Response(200, b''),
+            self.person.find(1).patch('partial_update', b'body', position='Manager'))
+
+    def test_instance_patch_nested(self):
+        self.http.respond_to(
+            'GET', '/people/1/addresses/1.json', {}, self.addy)
+        self.http.respond_to(
+            'PATCH', '/people/1/addresses/1/normalize_phone.json?locale=US',
+            self.zero_length_content_headers, b'', 204)
+
+        self.assertEqual(
+            connection.Response(204, b''),
+            self.address.find(1, person_id=1).patch('normalize_phone',
+                                                    locale='US'))
+
     def test_instance_get_nested(self):
         self.http.respond_to(
             'GET', '/people/1/addresses/1.json', {}, self.addy)
@@ -390,7 +440,6 @@ class ActiveResourceTest(unittest.TestCase):
             'GET', '/people/1/addresses/1/deep.json', {}, self.addy_deep)
         self.assertEqual({'id': 1, 'street': '12345 Street', 'zip': "27519" },
                          self.address.find(1, person_id=1).get('deep'))
-
 
     def test_instance_delete(self):
         self.http.respond_to('GET', '/people/1.json', {}, self.matz)

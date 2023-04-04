@@ -271,7 +271,7 @@ class Connection(object):
             request.add_header('Content-Type', self.format.mime_type)
             request.data = data
             self.log.debug('request-body:%s', request.data)
-        elif method in ['POST', 'PUT']:
+        elif method in ['POST', 'PUT', 'PATCH']:
           # Some web servers need a content length on all POST/PUT operations
           request.add_header('Content-Type', self.format.mime_type)
           request.add_header('Content-Length', '0')
@@ -361,6 +361,18 @@ class Connection(object):
             A Response object.
         """
         return self._open('PUT', path, headers=headers, data=data)
+
+    def patch(self, path, headers=None, data=None):
+        """Perform an HTTP patch request.
+
+        Args:
+            path: The HTTP path to retrieve.
+            headers: A dictionary of HTTP headers to add.
+            data: The data to send as the body of the request.
+        Returns:
+            A Response object.
+        """
+        return self._open('PATCH', path, headers=headers, data=data)
 
     def post(self, path, headers=None, data=None):
         """Perform an HTTP post request.
