@@ -8,10 +8,13 @@ if sys.version_info >= (3,):
 else:
     python_dateutils_version = 'python-dateutil<2.0'
 
+with open('README.md', 'r') as f:
+    long_description = f.read()
 
 setup(name='pyactiveresource',
       version=version,
       description='ActiveResource for Python',
+      long_description=long_description,
       author='Shopify',
       author_email='developers@shopify.com',
       url='https://github.com/Shopify/pyactiveresource/',
