@@ -160,6 +160,24 @@ tyler.first = 'Tyson'
 tyler.save()  # true
 ```
 
+Partial Update
+------
+'save' is also used to partially update an existing resource. If a list of attributes is passed in as argument
+```
+# {"first":"Tyler"}
+#
+# is submitted as the body on
+#
+# PATCH http://api.people.com:3000/people/1.json
+#
+# when save is called on an existing Person object.  An empty response is
+# is expected with code (204)
+#
+tyler.first = 'Tyson'
+tyler.last = 'Johnson'
+tyler.save(['first'])  # true
+```
+
 Delete
 -----
 Destruction of a resource can be invoked as a class and instance method of the resource.

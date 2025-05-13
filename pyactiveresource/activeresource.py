@@ -450,6 +450,21 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         resource.save()
         return resource
 
+    @classmethod
+    def update(cls, id_, attributes):
+        """Update an existing resource with the given attributes.
+
+        Args:
+            attributes: A dictionary of attributes to update.
+        Returns:
+            The updated resource (which may or may not have been updated successfully).
+        """
+        attrs = {"id": id_}
+        attrs.update(attributes)
+        resource = cls(attrs)
+        resource.save(attrs)
+        return resource
+
     # Non-public class methods to support the above
     @classmethod
     def _split_options(cls, options):
@@ -692,6 +707,20 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         return cls.connection.put(url, cls.headers, body)
 
     @classmethod
+    def _class_patch(cls, method_name, body=b'', **kwargs):
+        """Update a nested resource or resources.
+
+        Args:
+            method_name: the nested resource to update.
+            body: The data to send as the body of the request.
+            kwargs: Any keyword arguments for the query.
+        Returns:
+            A connection.Response object.
+        """
+        url = cls._custom_method_collection_url(method_name, kwargs)
+        return cls.connection.patch(url, cls.headers, body)
+
+    @classmethod
     def _class_delete(cls, method_name, **kwargs):
         """Delete a nested resource or resources.
 
@@ -814,11 +843,11 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
                 self.klass.headers)
         self._update(attributes)
 
-    def save(self):
+    def save(self, attributes=None):
         """Save the object to the server.
 
         Args:
-            None
+            attributes: If defines, list of object attributes for partial update (PATCH).
         Returns:
             True on success, False on ResourceInvalid errors (sets the errors
             attribute if an <errors> object is returned by the server).
@@ -828,10 +857,19 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         try:
             self.errors.clear()
             if self.id:
-                response = self.klass.connection.put(
+                if attributes:
+                    data = [(attr, getattr(self, attr)) for attr in attributes]
+                    data = dict((k, v) for k, v in data)
+                    payload = self.klass(data).encode()
+                    response = self.klass.connection.patch(
                         self._element_path(self.id, self._prefix_options),
                         self.klass.headers,
-                        data=self.encode())
+                        data=payload)
+                else:
+                    response = self.klass.connection.put(
+                            self._element_path(self.id, self._prefix_options),
+                            self.klass.headers,
+                            data=self.encode())
             else:
                 response = self.klass.connection.post(
                         self._collection_path(self._prefix_options),
@@ -1129,6 +1167,19 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
         url = self._custom_method_element_url(method_name, kwargs)
         return self.klass.connection.put(url, self.klass.headers, body)
 
+    def _instance_patch(self, method_name, body=b'', **kwargs):
+        """Update a nested resource.
+
+        Args:
+            method_name: the nested resource to update.
+            body: The data to send as the body of the request.
+            kwargs: Any keyword arguments for the query.
+        Returns:
+            A connection.Response object.
+        """
+        url = self._custom_method_element_url(method_name, kwargs)
+        return self.klass.connection.patch(url, self.klass.headers, body)
+
     def _instance_delete(self, method_name, **kwargs):
         """Delete a nested resource or resources.
 
@@ -1157,5 +1208,6 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
     get = ClassAndInstanceMethod('_class_get', '_instance_get')
     post = ClassAndInstanceMethod('_class_post', '_instance_post')
     put = ClassAndInstanceMethod('_class_put', '_instance_put')
+    patch = ClassAndInstanceMethod('_class_patch', '_instance_patch')
     delete = ClassAndInstanceMethod('_class_delete', '_instance_delete')
     head = ClassAndInstanceMethod('_class_head', '_instance_head')

@@ -190,6 +190,19 @@ class ConnectionTest(unittest.TestCase):
         self.http.respond_to('PUT', '/people/2.json', header, '', 204)
         response = self.connection.put('/people/2.json', self.header)
         self.assertEqual(204, response.code)
+
+    def test_patch(self):
+        self.http.respond_to('PATCH', '/people/1.json',
+                             self.zero_length_content_headers, '', 204)
+        response = self.connection.patch('/people/1.json')
+        self.assertEqual(204, response.code)
+
+    def test_patch_with_header(self):
+        header = self.header
+        header.update(self.zero_length_content_headers)
+        self.http.respond_to('PATCH', '/people/2.json', header, '', 204)
+        response = self.connection.patch('/people/2.json', self.header)
+        self.assertEqual(204, response.code)
   
     def test_delete(self):
         self.http.respond_to('DELETE', '/people/1.json', {}, '')
