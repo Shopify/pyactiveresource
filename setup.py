@@ -19,6 +19,7 @@ setup(name='pyactiveresource',
       license='MIT License',
       test_suite='test',
       install_requires=[
+          'certifi',
           'six',
       ],
       tests_require=[
