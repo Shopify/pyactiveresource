@@ -407,6 +407,44 @@ class UtilTest(unittest.TestCase):
             result = util.camelize(noncamel_input)
             self.assertEquals(result, expected)
 
+    def test_regular_pluralize(self):
+        input_expected = {
+            "quiz": "quizzes",
+            "ox": "oxen",
+            "mouse": "mice",
+            "louse": "lice",
+            "matrix": "matrices",
+            "vertex": "vertices",
+            "index": "indices",
+            "sex": "sexes",
+            "torch": "torches",
+            "kiss": "kisses",
+            "brush": "brushes",
+            "colloquy": "colloquies",
+            "baby": "babies",
+            "hive": "hives",
+            "knife": "knives",
+            "wolf": "wolves",
+            "scarf": "scarves",
+            "stasis": "stases",
+            "ultimatum": "ultimata",
+            "stadium": "stadia",
+            "buffalo": "buffaloes",
+            "tomato": "tomatoes",
+            "aerobus": "aerobuses",
+            "alias": "aliases",
+            "status": "statuses",
+            "octopus": "octopi",
+            "virus": "viri",
+            "axis": "axes",
+            "testis": "testes",
+            "cup": "cups",
+            "giraffe": "giraffes",
+        }
+        for singular_input, expected in input_expected.items():
+            result = util.pluralize(singular_input)
+            self.assertEquals(result, expected)
+
 
 if __name__ == '__main__':
     unittest.main()
