@@ -72,6 +72,22 @@ class ActiveResourceTest(unittest.TestCase):
         self.store = Store
         self.address = Address
 
+    def test_exists_for_success_and_not_found(self):
+        for status, expected in ((200, True), (404, False)):
+            self.http.respond_to('HEAD', '/people/1.json', {}, '', code=status)
+            self.assertEqual(expected, self.person.exists(1))
+
+    def test_exists_preserves_other_http_errors(self):
+        for status, error_class in ((401, connection.UnauthorizedAccess),
+                                    (403, connection.ForbiddenAccess),
+                                    (429, connection.ClientError),
+                                    (500, connection.ServerError)):
+            self.http.respond_to('HEAD', '/people/1.json', {}, '', code=status)
+            with self.assertRaises(error_class) as caught:
+                self.person.exists(1)
+            if isinstance(caught.exception, connection.ClientError):
+                self.assertEqual(status, caught.exception.response.code)
+
     def test_find_one(self):
         # Return an object for a specific one-off url
         self.http.respond_to(
