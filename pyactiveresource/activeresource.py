@@ -427,14 +427,16 @@ class ActiveResource(six.with_metaclass(ResourceMeta, object)):
             id_: The id or other key which specifies a unique object.
             kwargs: Any keyword arguments for query.
         Returns:
-            True if the resource is found, False otherwise.
+            True if the resource is found, False for a 404 response.
+        Raises:
+            connection.Error: On other HTTP or communications errors.
         """
         prefix_options, query_options = cls._split_options(kwargs)
         path = cls._element_path(id_, prefix_options, query_options)
         try:
             _ = cls.connection.head(path, cls.headers)
             return True
-        except connection.Error:
+        except connection.ResourceNotFound:
             return False
 
     @classmethod
