@@ -1,3 +1,5 @@
+> **This repository is no longer maintained.** It has been archived and receives no updates or security fixes. Most people use it through ShopifyAPI, which is replaced by [`shopifyapp`](https://pypi.org/project/shopifyapp/).
+
 PyActiveResource 
 ================
  [![Build Status](https://github.com/Shopify/pyactiveresource/workflows/CI/badge.svg?branch=master)](https://github.com/Shopify/pyactiveresource/actions)
